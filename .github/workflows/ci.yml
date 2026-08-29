@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "task/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Unit tests (vitest)
+        run: pnpm test
+
+      - name: arch:check
+        run: pnpm arch:check
+
+      - name: i18n:check
+        run: pnpm i18n:check
+
+      - name: system:update (regenerate SYSTEM.md)
+        run: pnpm system:update
+
+      - name: SYSTEM.md drift guard
+        run: |
+          if ! git diff --exit-code SYSTEM.md; then
+            echo "::error::SYSTEM.md is out of date. Run 'pnpm system:update' and commit. Never hand-edit SYSTEM.md (STANDARDS §11)."
+            exit 1
+          fi
+
+      - name: bundle:guard
+        run: pnpm bundle:guard
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: e2e (playwright)
+        run: pnpm test:e2e

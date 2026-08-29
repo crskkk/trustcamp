@@ -1,0 +1,20 @@
+{
+  "app.title": "TrustCamp",
+  "app.subtitle": "A mini-planet camping world. Under construction.",
+  "unity.placeholder": "Unity world mounts here (task 0002+)",
+  "status.title": "System Status",
+  "status.workers": "Workers",
+  "status.tests": "Tests passing",
+  "status.version": "Version",
+  "status.system": "SYSTEM.md preview",
+  "status.refresh": "Refresh",
+  "status.dismiss": "Dismiss",
+  "status.notrun": "—",
+  "worker.arch-check": "arch:check",
+  "worker.i18n-check": "i18n:check",
+  "worker.system-update": "system:update",
+  "worker.bundle-guard": "bundle:guard",
+  "status.ok": "ok",
+  "status.fail": "fail",
+  "status.running": "running…"
+}

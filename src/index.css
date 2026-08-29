@@ -1,0 +1,125 @@
+:root {
+  --tc-bg: #0b1020;
+  --tc-fg: #e6ecff;
+  --tc-accent: #7c5cff;
+  --tc-ok: #36d399;
+  --tc-bad: #f87272;
+  --tc-panel: rgba(12, 18, 40, 0.92);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  background: var(--tc-bg);
+  color: var(--tc-fg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.tc-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.tc-app h1 {
+  font-size: clamp(2rem, 6vw, 4rem);
+  margin: 0 0 0.5rem;
+  background: linear-gradient(120deg, var(--tc-accent), #36d3ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tc-app p { color: #9fb0e0; max-width: 38ch; }
+
+.tc-unity-placeholder {
+  margin-top: 2rem;
+  width: min(80vw, 640px);
+  aspect-ratio: 16 / 9;
+  border: 2px dashed #2a3358;
+  border-radius: 1rem;
+  display: grid;
+  place-items: center;
+  color: #5e6fa8;
+}
+
+/* System Status panel (dev-only, temporary — task 0001) */
+.tc-sp {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: min(90vw, 320px);
+  background: var(--tc-panel);
+  border: 1px solid #2a3358;
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.82rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  z-index: 50;
+}
+.tc-sp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+.tc-sp-head strong { font-size: 0.95rem; }
+.tc-sp-actions { display: flex; gap: 0.25rem; }
+.tc-sp-actions button {
+  background: transparent;
+  border: none;
+  color: #9fb0e0;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  line-height: 1;
+}
+.tc-sp-section { margin-bottom: 0.5rem; }
+.tc-sp-label { color: #9fb0e0; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.tc-sp-workers { list-style: none; margin: 0.25rem 0 0; padding: 0; }
+.tc-sp-workers li { display: flex; align-items: center; gap: 0.45rem; padding: 0.1rem 0; }
+.tc-sp-dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #555; display: inline-block; }
+.tc-sp-dot.ok { background: var(--tc-ok); }
+.tc-sp-dot.bad { background: var(--tc-bad); }
+.tc-sp-dot.pending { background: #555; }
+.tc-sp-row { display: flex; justify-content: space-between; align-items: baseline; margin: 0.3rem 0; }
+.tc-sp-value { font-variant-numeric: tabular-nums; }
+.tc-sp-chip {
+  background: var(--tc-accent);
+  color: #fff;
+  padding: 0.05rem 0.45rem;
+  border-radius: 1rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.tc-sp-system summary { cursor: pointer; color: #9fb0e0; margin-top: 0.3rem; }
+.tc-sp-system pre {
+  max-height: 10rem;
+  overflow: auto;
+  background: #060a18;
+  border: 1px solid #1c2440;
+  border-radius: 0.4rem;
+  padding: 0.4rem;
+  font-size: 0.7rem;
+  margin: 0.3rem 0 0;
+  white-space: pre-wrap;
+}
+.tc-sp-resume {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--tc-panel);
+  border: 1px solid #2a3358;
+  color: #e6ecff;
+  cursor: pointer;
+  z-index: 50;
+}

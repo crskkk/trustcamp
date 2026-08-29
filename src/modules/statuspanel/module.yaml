@@ -1,0 +1,11 @@
+name: statuspanel
+description: >
+  TEMPORARY dev-only System Status overlay (task 0001). Renders live worker
+  status lights, test pass %, SYSTEM.md preview, and the version chip. This
+  module is the temporary visual artifact required by GAUNTLET.md §1 for a
+  backend component; it is absorbed by the real HUD (task 0006) or Admin
+  panel (task 0306) and this folder is removed at that time.
+version: 0.1.0
+api: src/modules/statuspanel/StatusPanel.tsx
+depends_on:
+  - i18n

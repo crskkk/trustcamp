@@ -1,0 +1,20 @@
+{
+  "app.title": "TrustCamp",
+  "app.subtitle": "Um mundo de acampamento num mini-planeta. Em construção.",
+  "unity.placeholder": "O mundo Unity monta aqui (tarefa 0002+)",
+  "status.title": "Estado do Sistema",
+  "status.workers": "Workers",
+  "status.tests": "Testes aprovados",
+  "status.version": "Versão",
+  "status.system": "Prévia do SYSTEM.md",
+  "status.refresh": "Atualizar",
+  "status.dismiss": "Fechar",
+  "status.notrun": "—",
+  "worker.arch-check": "arch:check",
+  "worker.i18n-check": "i18n:check",
+  "worker.system-update": "system:update",
+  "worker.bundle-guard": "bundle:guard",
+  "status.ok": "ok",
+  "status.fail": "falhou",
+  "status.running": "executando…"
+}

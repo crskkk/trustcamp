@@ -1,0 +1,41 @@
+{
+  "name": "trustcamp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TrustCamp — a Unity-WebGL mini-planet camping world with LTI 1.3, built via the Gauntlet Loop.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run --reporter=json --outputFile=test-results.json",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "arch:check": "tsx workers/arch-check/index.ts",
+    "i18n:check": "tsx workers/i18n-check/index.ts",
+    "system:update": "tsx workers/system-update/index.ts",
+    "bundle:guard": "tsx workers/bundle-guard/index.ts",
+    "balance:sim": "echo \"balance:sim is a stub (real impl in a later task)\" && exit 0"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "glob": "^11.0.0",
+    "js-yaml": "^4.1.0",
+    "jsdom": "^25.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.6",
+    "vitest": "^2.1.0"
+  }
+}

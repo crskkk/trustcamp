@@ -1,9 +1,14 @@
 # ROADMAP.md — Versioned Priorities & Integration Strategy
 
+**Current version: v0.1** (StatusPanel reads this line to render the version chip.)
+
 Versions use **dot-versioning** `vX.Y`: X = milestone (phase of the world), Y = task
 merged within that phase. Every merged task bumps Y. Milestone gates (M1–M4 below)
 must ALL pass before X increments. Current version moves forward one merge at a time;
 see git history for the up-to-date value.
+
+## Merged
+- `v0.1` — 0001 worker spine + repo bootstrap + dev-only System Status panel.
 
 ## Integration strategy (how components come together)
 

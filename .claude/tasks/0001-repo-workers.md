@@ -17,7 +17,13 @@ test that exercises one of them.
 - `workers/system-update/index.spec.ts` asserts `SYSTEM.md` includes header
   sections after running the worker on a fixture module tree.
 
-**Visual checkpoint:** CI passes and `SYSTEM.md` is regenerated; run
-`pnpm system:update` and `pnpm i18n:check` and they exit 0.
+**Visual checkpoint:** `pnpm dev` renders a dev-only **System Status panel**
+(bottom-right overlay) showing: four worker status lights (arch:check,
+i18n:check, system:update, bundle:guard), a `N / M tests passing` line read
+from `test-results.json`, a SYSTEM.md preview, and the `v0.1` version chip read
+from `ROADMAP.md`. Playwright `e2e/status-panel.spec.ts` asserts all four are
+visible. This panel is the temporary visual artifact from GAUNTLET.md §1 for a
+backend component; it is absorbed by the real HUD (task 0006) / Admin (0306).
 
-**Merge:** squash `main`, delete branch, ROADMAP bumps v0.1.
+**Merge:** squash `main`, delete branch `task/0001-repo-workers`, ROADMAP bumps
+to v0.1, commit regenerated `SYSTEM.md`.

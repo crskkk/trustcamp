@@ -1,0 +1,9 @@
+name: i18n
+description: >
+  Localization module. Exposes t(key, lang) and detectLang(). Holds the
+  en/es/pt dictionaries. Other modules must not hold user-facing string
+  literals; they call this module's api. The i18n-check worker verifies
+  coverage against these dictionaries.
+version: 0.1.0
+api: src/modules/i18n/api.ts
+depends_on: []

@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+dist/
+test-results.json
+test-results/
+.DS_Store
+*.local
+# Unity build output is committed while we have no real Unity project yet;
+# revisit when task 0002 produces a real build.
+.vite/
+
+# Unity build output is committed while we have no real Unity project yet;
+# revisit when task 0002 produces a real build.
+.vite/
