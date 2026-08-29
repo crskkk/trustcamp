@@ -16,16 +16,19 @@ test.describe("HUD skeleton", () => {
       await expect(page.getByText(new RegExp(key, "i"))).toBeVisible();
     }
 
-    // Collapse → only the toggle button is visible.
+    // Collapse → only the toggle button is visible inside the HUD chrome.
+    // (The dev-only System Status panel may render its own buttons outside
+    // the HUD; we scope the count to the HUD root.)
     await page.getByRole("button", { name: /collapse/i }).click();
-    const visibleButtons = page.getByRole("button");
-    await expect(visibleButtons).toHaveCount(1);
-    await expect(page.getByRole("button", { name: /expand/i })).toBeVisible();
-    await expect(page.getByText(/score/i)).toHaveCount(0);
+    const hudRoot = page.getByTestId("hud-root");
+    const visibleHudButtons = hudRoot.getByRole("button");
+    await expect(visibleHudButtons).toHaveCount(1);
+    await expect(hudRoot.getByRole("button", { name: /expand/i })).toBeVisible();
+    await expect(hudRoot.getByText(/score/i)).toHaveCount(0);
 
     // Expand → rows return.
-    await page.getByRole("button", { name: /expand/i }).click();
-    await expect(page.getByText(/score/i)).toBeVisible();
+    await hudRoot.getByRole("button", { name: /expand/i }).click();
+    await expect(hudRoot.getByText(/score/i)).toBeVisible();
   });
 
   test("Spanish locale renders the Spanish HUD label", async ({ browser }) => {

@@ -1,7 +1,22 @@
-// workers/i18n-check/logic.ts — assert every used key exists in all three dictionaries.
+// workers/i18n-check/logic.ts — assert every used key exists in all three
+// dictionaries, and surface any hardcoded JSX text nodes (AGENTS §6).
+//
+// The hardcoded-string scan is structural: it walks the raw source and
+// reports any JSX text content (a `>...<` segment that isn't pure
+// whitespace, isn't an i18n key, and isn't one of a tiny allow-list of
+// glyphs). It is reported as a `warning` (not a blocker) so the
+// developer can see it in the panel / CI summary without failing every
+// build on the first day. A future task can promote it to a blocker.
 import type { Reader, WorkerResult } from "../shared/reader";
 
 export type Lang = "en" | "es" | "pt";
+
+export interface HardcodedString {
+  file: string;
+  line: number;
+  text: string;
+  rule: "jsx-text";
+}
 
 export interface RunOpts {
   reader: Reader;
@@ -9,9 +24,21 @@ export interface RunOpts {
   dictionaries: Record<Lang, Record<string, string>>;
   /** Keys observed used in code (via t("...")). */
   usedKeys: string[];
+  /** Hardcoded JSX text nodes found by the source scan (Node path). */
+  hardcoded?: HardcodedString[];
 }
 
-export async function run({ dictionaries, usedKeys }: RunOpts): Promise<WorkerResult> {
+export interface RunDetails {
+  missing: string[];
+  hardcoded: HardcodedString[];
+  used: number;
+}
+
+export async function run({
+  dictionaries,
+  usedKeys,
+  hardcoded = [],
+}: RunOpts): Promise<WorkerResult> {
   const langs: Lang[] = ["en", "es", "pt"];
   const missing: string[] = [];
   for (const key of usedKeys) {
@@ -21,8 +48,22 @@ export async function run({ dictionaries, usedKeys }: RunOpts): Promise<WorkerRe
       }
     }
   }
-  if (missing.length > 0) {
-    return { ok: false, message: `missing dictionary keys:\n${missing.join("\n")}`, details: { missing } };
+  const blocker = missing.length > 0;
+  if (blocker) {
+    return {
+      ok: false,
+      message: `missing dictionary keys:\n${missing.join("\n")}`,
+      details: { missing, hardcoded, used: usedKeys.length },
+    };
   }
-  return { ok: true, message: `${usedKeys.length} key(s) present in all three dictionaries`, details: { missing: [] } };
+  // No missing keys. Hardcoded strings are a warning, not a blocker.
+  const warn = hardcoded.length;
+  const summary =
+    `${usedKeys.length} key(s) present in all three dictionaries` +
+    (warn > 0 ? `; ${warn} hardcoded string(s) flagged` : "");
+  return {
+    ok: true,
+    message: summary,
+    details: { missing: [], hardcoded, used: usedKeys.length },
+  };
 }

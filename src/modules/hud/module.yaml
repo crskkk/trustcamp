@@ -6,6 +6,6 @@ description: >
   go through the i18n module's dictionaries. Other modules reach the HUD
   only through this module's api file.
 version: 0.1.0
-api: src/modules/hud/api.ts
+api: src/modules/hud/api.tsx
 depends_on:
   - i18n

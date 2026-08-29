@@ -59,20 +59,24 @@ export function StatusPanel() {
       <div className="tc-sp-section">
         <div className="tc-sp-label">{t("status.workers")}</div>
         <ul className="tc-sp-workers">
-          {WORKER_KEYS.map((k) => (
-            <li key={k}>
-              <span
-                className={`tc-sp-dot ${
-                  state?.results[k]?.ok === undefined
-                    ? "pending"
-                    : state.results[k].ok
-                    ? "ok"
-                    : "bad"
-                }`}
-              />
-              {t(`worker.${k}`)}
-            </li>
-          ))}
+          {WORKER_KEYS.map((k) => {
+            const r = state?.results[k];
+            const status = r?.ok === undefined ? "pending" : r.ok ? "ok" : "bad";
+            const detail = r?.message ?? t("status.running");
+            return (
+              <li key={k} className={`tc-sp-worker tc-sp-worker--${status}`}>
+                <span className={`tc-sp-dot ${status}`} aria-hidden="true" />
+                <span className="tc-sp-worker-name">{t(`worker.${k}`)}</span>
+                <span
+                  className="tc-sp-worker-detail"
+                  data-testid={`worker-detail-${k}`}
+                  title={detail}
+                >
+                  {detail}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
