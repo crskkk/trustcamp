@@ -1,0 +1,5 @@
+name: okmod
+description: A minimal well-formed module used by arch-check spec.
+version: 0.1.0
+api: workers/arch-check/__fixtures__/well-formed/api.ts
+depends_on: []

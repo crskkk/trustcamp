@@ -1,0 +1,5 @@
+name: b
+description: Fixture module "b" — owns a private `internal/` folder the boundary lint must keep private.
+version: 0.0.1
+api: workers/arch-check/__fixtures__/violating-ok-layout/b/api.ts
+depends_on: []

@@ -1,0 +1,5 @@
+name: a
+description: Fixture module "a" (used by arch-check spec to exercise the boundary lint).
+version: 0.0.1
+api: workers/arch-check/__fixtures__/violating-ok-layout/a/api.ts
+depends_on: [b]

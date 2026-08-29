@@ -1,16 +1,21 @@
-/// <reference types="vitest" />
+// vite.config.mjs — the dev/test/build config for the Lovable shell.
+// Lives in plain JS (not .ts) so vite does not have to bundle it through
+// esbuild on the sandboxed CI image. The .d.ts triple-slash reference
+// keeps `vitest` field types available to editors via the `vite` package.
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { readFileSync, existsSync } from "node:fs";
+
+/// <reference types="vitest" />
 
 // Dev-only middleware: serve repo-root artifacts the StatusPanel fetches at runtime
 // (test-results.json, SYSTEM.md, ROADMAP.md). These are generated files, not in /public.
 function serveRootArtifacts() {
   return {
     name: "serve-root-artifacts",
-    configureServer(server: any) {
-      server.middlewares.use((req: any, res: any, next: any) => {
-        const serve = (file: string, type: string) => {
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const serve = (file, type) => {
           if (existsSync(file)) {
             res.setHeader("Content-Type", type);
             res.end(readFileSync(file, "utf8"));
