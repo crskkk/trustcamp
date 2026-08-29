@@ -11,20 +11,26 @@
 - **depends_on:** bridge, i18n
 - **description:** The React iframe host for the embedded Unity WebGL world. Renders the iframe at /unity/Build/index.html, installs the bridge on mount, and shows a localized loading overlay until the build loads. Calls bridge.joinWorld() on load to prove the Unity↔shell pipe. The actual Unity build is task 0003.
 
-### statuspanel `0.1.0`
-
-- **api:** `src/modules/statuspanel/StatusPanel.tsx`
-- **depends_on:** i18n
-- **description:** TEMPORARY dev-only System Status overlay (task 0001). Renders live worker status lights, test pass %, SYSTEM.md preview, and the version chip. This module is the temporary visual artifact required by GAUNTLET.md §1 for a backend component; it is absorbed by the real HUD (task 0006) or Admin panel (task 0306) and this folder is removed at that time.
-
 ### i18n `0.1.0`
 
 - **api:** `src/modules/i18n/api.ts`
 - **depends_on:** —
 - **description:** Localization module. Exposes t(key, lang) and detectLang(). Holds the en/es/pt dictionaries. Other modules must not hold user-facing string literals; they call this module's api. The i18n-check worker verifies coverage against these dictionaries.
 
+### hud `0.1.0`
+
+- **api:** `src/modules/hud/api.ts`
+- **depends_on:** i18n
+- **description:** The persistent HUD chrome. Renders the score / role / level / items / notifications / avatar / leaderboard placeholders, a language toggle (en/es/pt), and a collapse-to-one-button behavior. All user-facing strings go through the i18n module's dictionaries. Other modules reach the HUD only through this module's api file.
+
 ### bridge `0.4.0`
 
 - **api:** `src/modules/bridge/api.ts`
 - **depends_on:** —
 - **description:** The realtime transport door. Exposes joinWorld/leaveWorld/sendState/onState and mounts the Unity-facing window.__tcBridge. The backing transport is Supabase Realtime (task 0004) with in-memory fallback; task 0005+ may swap for Colyseus behind the same api surface (AGENTS §13).
+
+### statuspanel `0.1.0`
+
+- **api:** `src/modules/statuspanel/StatusPanel.tsx`
+- **depends_on:** i18n
+- **description:** TEMPORARY dev-only System Status overlay (task 0001). Renders live worker status lights, test pass %, SYSTEM.md preview, and the version chip. This module is the temporary visual artifact required by GAUNTLET.md §1 for a backend component; it is absorbed by the real HUD (task 0006) or Admin panel (task 0306) and this folder is removed at that time.

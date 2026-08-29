@@ -124,13 +124,17 @@ export async function run({ reader }: RunOpts): Promise<WorkerResult> {
   // confirm that every module's `api:` path actually exists on disk.
   const allSrc = await reader.glob("src/modules/**/*.{ts,tsx,cs,py}");
   const allSrcSet = new Set(allSrc);
+  // Also accept the same path with the extension swapped (.ts ↔ .tsx) —
+  // a module may declare `api: .../api.ts` while the file is `api.tsx`.
+  const allSrcLoose = new Set<string>();
+  for (const p of allSrcSet) {
+    allSrcLoose.add(p);
+    allSrcLoose.add(p.replace(/\.ts$/, ".tsx"));
+    allSrcLoose.add(p.replace(/\.tsx$/, ".ts"));
+  }
   const apiFileExists = (api: string) => {
     if (!api) return false;
-    if (allSrcSet.has(api)) return true;
-    // Also accept any non-listed suffix — the api may live under a different
-    // path (e.g. .ts) than the glob above found. A safe-fail to "true"
-    // here would mask real missing files, so we still require that the
-    // exact path was globbed. Callers can pre-load the file in the reader.
+    if (allSrcLoose.has(api)) return true;
     return false;
   };
   for (const m of modules) {

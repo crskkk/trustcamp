@@ -19,5 +19,19 @@
   "worker.bundle-guard": "bundle:guard",
   "status.ok": "ok",
   "status.fail": "falhou",
-  "status.running": "executando…"
+  "status.running": "executando…",
+  "hud.title": "TrustCamp",
+  "hud.collapse": "Recolher HUD",
+  "hud.expand": "Expandir HUD",
+  "hud.score": "Pontuação",
+  "hud.role": "Função",
+  "hud.level": "Nível",
+  "hud.items": "Itens",
+  "hud.notifications": "Notificações",
+  "hud.avatar": "Avatar",
+  "hud.leaderboard": "Ranking",
+  "hud.lang.en": "English",
+  "hud.lang.es": "Español",
+  "hud.lang.pt": "Português",
+  "hud.lang.label": "Idioma"
 }

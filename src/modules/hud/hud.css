@@ -1,0 +1,103 @@
+/* src/modules/hud/hud.css — chrome styling for the HUD. The HUD is
+   persistent, minimal, and collapses to a single button. */
+
+.tc-hud {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(8, 10, 18, 0.92);
+  color: #f4f4f6;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+}
+
+.tc-hud-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  min-height: 44px;
+}
+
+.tc-hud-title {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.tc-hud-rows {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tc-hud-row {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tc-hud-key {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.tc-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.tc-hud-lang {
+  display: inline-flex;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.tc-hud-lang-btn {
+  background: transparent;
+  color: inherit;
+  border: 0;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tc-hud-lang-btn.is-active {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.tc-hud-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  width: 36px;
+  height: 32px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tc-hud-toggle:hover,
+.tc-hud-toggle:focus-visible {
+  outline: 2px solid #5fa8ff;
+  outline-offset: 2px;
+}
+
+.tc-hud-children {
+  padding: 0 14px 12px;
+}
+
+.tc-hud--collapsed .tc-hud-bar {
+  justify-content: flex-end;
+}

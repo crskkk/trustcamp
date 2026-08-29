@@ -1,0 +1,11 @@
+name: hud
+description: >
+  The persistent HUD chrome. Renders the score / role / level / items /
+  notifications / avatar / leaderboard placeholders, a language toggle
+  (en/es/pt), and a collapse-to-one-button behavior. All user-facing strings
+  go through the i18n module's dictionaries. Other modules reach the HUD
+  only through this module's api file.
+version: 0.1.0
+api: src/modules/hud/api.ts
+depends_on:
+  - i18n
