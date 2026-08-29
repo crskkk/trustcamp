@@ -35,3 +35,6 @@ crashlytics-build.properties
 
 # Exports / builds written by dev:unity land in the repo's public/unity/Build/, not here
 /Build/
+
+# Generated test results (edit-mode tests write here)
+/TestResults/
