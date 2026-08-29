@@ -4,6 +4,7 @@
   "unity.placeholder": "El mundo de Unity se monta aquí (tarea 0002+)",
   "world.title": "Mundo de TrustCamp",
   "world.loading": "Cargando mundo…",
+  "world.noBuild": "Ejecuta `pnpm dev:unity` para construir el planeta.",
   "status.title": "Estado del Sistema",
   "status.workers": "Workers",
   "status.tests": "Pruebas aprobadas",

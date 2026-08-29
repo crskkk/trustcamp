@@ -10,14 +10,17 @@ it fails.
 
 ## M1 — Foundation (v0.x)
 
-**T-1 Dev run & embed**
-1. `pnpm dev` and open the printed URL on desktop + viewport.
-2. You must see the shell chrome (title + status panel) with the embedded
-   Unity iframe below.
-3. The embed loads `public/unity/Build/index.html` and shows a shaded sphere
-   (placeholder build until task 0003 ships the real planet).
+**T-1 Dev run & planet**
+1. Run `pnpm dev:unity` once to build the Unity WebGL planet into `public/unity/Build/`
+   (first build takes several minutes; needs Unity 6 LTS + WebGL module installed).
+2. `pnpm dev` and open the printed URL.
+3. The embed loads the real planet: a spherical mini-planet whose four biomes
+   (forest, lake, camp, mountains) are visible; an orbit camera auto-rotates so
+   all four pass into view within ~60 s (drag to rotate manually).
 4. The browser console logs `[bridge] joinWorld ok <sessionId>`.
-5. Expected: no black screen, no loader hang, no console errors.
+5. Without the build (e.g. CI, or before `dev:unity`), the embed falls back to
+   the placeholder sphere at `/unity/placeholder.html` — no black screen.
+6. Expected: no black screen, no loader hang, no console errors.
    If fail: don't merge; fix scope.
 
 **T-2 Workers green (v0.x gate)**

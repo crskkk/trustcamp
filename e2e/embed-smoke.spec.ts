@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test";
 
-// Visual Checkpoint for task 0002: the embedded Unity placeholder loads (no black
-// screen), the bridge namespace resolves on the parent window, and a joinWorld
-// success is observable.
-test("unity embed loads, bridge resolves, joinWorld succeeds", async ({ page }) => {
+// Task 0002 bridge harness smoke (updated in 0003 to drop the placeholder-only
+// sphere testid): the iframe is visible, the bridge resolves on the parent, and
+// a joinWorld success is logged. Works against both the placeholder (CI) and the
+// real Unity build (local after `pnpm dev:unity`).
+test("unity embed iframe present, bridge resolves, joinWorld succeeds", async ({ page }) => {
   const joinWorldHeard: string[] = [];
   page.on("console", (msg) => {
     const t = msg.text();
@@ -12,13 +13,9 @@ test("unity embed loads, bridge resolves, joinWorld succeeds", async ({ page }) 
 
   await page.goto("/");
 
-  // The embedded iframe must exist and point at the Unity build.
-  const iframe = page.locator('iframe[src*="/unity/Build/index.html"]');
+  // The iframe points at the build (local) or the placeholder (CI).
+  const iframe = page.locator('iframe[src*="/unity/"]');
   await expect(iframe).toBeVisible();
-
-  // The placeholder sphere is visible inside the frame (no black screen).
-  const frame = iframe.contentFrame();
-  await expect(frame!.locator("[data-testid='unity-sphere']")).toBeVisible();
 
   // The bridge namespace is installed on the parent window.
   const hasBridge = await page.evaluate(() => typeof (window as any).__tcBridge === "object");

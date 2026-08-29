@@ -1,0 +1,7 @@
+{
+    "name": "TrustCamp.EditorTools",
+    "references": ["UnityEngine", "TrustCamp.World"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

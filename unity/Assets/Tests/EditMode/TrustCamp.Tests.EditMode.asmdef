@@ -1,0 +1,12 @@
+{
+    "name": "TrustCamp.Tests.EditMode",
+    "references": [
+        "UnityEngine",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "TrustCamp.World"
+    ],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

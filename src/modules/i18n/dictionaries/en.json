@@ -4,6 +4,7 @@
   "unity.placeholder": "Unity world mounts here (task 0002+)",
   "world.title": "TrustCamp world",
   "world.loading": "Loading world…",
+  "world.noBuild": "Run `pnpm dev:unity` to build the planet.",
   "status.title": "System Status",
   "status.workers": "Workers",
   "status.tests": "Tests passing",

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="2" result="Passed" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-29 03:27:10Z" end-time="2026-08-29 03:27:10Z" duration="0.2042341">
+  <test-suite type="TestSuite" id="1000" name="unity" fullname="unity" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-29 03:27:10Z" end-time="2026-08-29 03:27:10Z" duration="0.204234" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1004" name="TrustCamp.Tests.EditMode.dll" fullname="C:/Users/crist/trustcamp/unity/Library/ScriptAssemblies/TrustCamp.Tests.EditMode.dll" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-29 03:27:10Z" end-time="2026-08-29 03:27:10Z" duration="0.176882" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="9172" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1005" name="TrustCamp" fullname="TrustCamp" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-29 03:27:10Z" end-time="2026-08-29 03:27:10Z" duration="0.176023" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1006" name="Tests" fullname="TrustCamp.Tests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-29 03:27:10Z" end-time="2026-08-29 03:27:10Z" duration="0.175824" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1007" name="EditMode" fullname="TrustCamp.Tests.EditMode" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-29 03:27:10Z" end-time="2026-08-29 03:27:10Z" duration="0.175578" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1001" name="PlanetScaffoldEditTests" fullname="TrustCamp.Tests.EditMode.PlanetScaffoldEditTests" classname="TrustCamp.Tests.EditMode.PlanetScaffoldEditTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-29 03:27:10Z" end-time="2026-08-29 03:27:10Z" duration="0.173357" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1002" name="PlanetHasFourBiomes" fullname="TrustCamp.Tests.EditMode.PlanetScaffoldEditTests.PlanetHasFourBiomes" methodname="PlanetHasFourBiomes" classname="TrustCamp.Tests.EditMode.PlanetScaffoldEditTests" runstate="Runnable" seed="1962916144" result="Passed" start-time="2026-08-29 03:27:10Z" end-time="2026-08-29 03:27:10Z" duration="0.119629" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1003" name="PlanetHasGeneratedMesh" fullname="TrustCamp.Tests.EditMode.PlanetScaffoldEditTests.PlanetHasGeneratedMesh" methodname="PlanetHasGeneratedMesh" classname="TrustCamp.Tests.EditMode.PlanetScaffoldEditTests" runstate="Runnable" seed="1478060657" result="Passed" start-time="2026-08-29 03:27:10Z" end-time="2026-08-29 03:27:10Z" duration="0.022965" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: C:\Users\crist\trustcamp\unity\TestResults\results.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

@@ -16,10 +16,17 @@ builds the WebGL bundle reproducibly.
 Unity-visible methods).
 
 **Red test:**
-- Batch build script test: `unity.Test/PlanetScaffoldEditTests.cs` asserts the
-  four named biome regions exist in the scene graph.
+- Unity edit-mode test `unity/Assets/Tests/EditMode/PlanetScaffoldEditTests.cs`
+  asserts the four named biome regions (Forest/Lake/Camp/Mountains) exist on the
+  generated planet, plus a generated mesh. Run via `Unity.exe -batchmode -runTests
+  -testPlatform EditMode`. Red first (fake-null GetComponent bug), then green.
 
-**Visual checkpoint:** Followed camera from any vantage can distinguish
-forest/lake/camp/mountain within 60 s of spawn (human run of T-1).
+**Visual checkpoint:** `pnpm dev:unity` builds the real Unity WebGL planet into
+`public/unity/Build/`; `pnpm dev` renders it in the embedded iframe — a spherical
+mini-planet with four distinguishable biomes; an auto-rotating orbit camera brings
+all four into view within ~60 s (drag to rotate). `e2e/planet-smoke.spec.ts`
+asserts a non-black WebGL canvas (local-only; skipped in CI where no build exists).
+Without the build, `WorldEmbed` falls back to `public/unity/placeholder.html` so CI
+and fresh clones still show a non-black embed (the 0002 placeholder sphere).
 
-**Merge:** squash, version bump v0.3.
+**Merge:** squash to `main`, delete branch `task/0003-planet-scaffold`, bump to v0.3.
