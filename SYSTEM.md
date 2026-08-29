@@ -5,6 +5,12 @@
 
 ## Modules
 
+### world `0.2.0`
+
+- **api:** `src/modules/world/api.ts`
+- **depends_on:** bridge, i18n
+- **description:** The React iframe host for the embedded Unity WebGL world. Renders the iframe at /unity/Build/index.html, installs the bridge on mount, and shows a localized loading overlay until the build loads. Calls bridge.joinWorld() on load to prove the Unity↔shell pipe. The actual Unity build is task 0003.
+
 ### statuspanel `0.1.0`
 
 - **api:** `src/modules/statuspanel/StatusPanel.tsx`
@@ -16,3 +22,9 @@
 - **api:** `src/modules/i18n/api.ts`
 - **depends_on:** —
 - **description:** Localization module. Exposes t(key, lang) and detectLang(). Holds the en/es/pt dictionaries. Other modules must not hold user-facing string literals; they call this module's api. The i18n-check worker verifies coverage against these dictionaries.
+
+### bridge `0.2.0`
+
+- **api:** `src/modules/bridge/api.ts`
+- **depends_on:** —
+- **description:** The realtime transport door. Exposes joinWorld/leaveWorld/sendState/onState and mounts the Unity-facing window.__tcBridge. The backing transport is an in-memory stub (task 0002); task 0004 swaps it for Supabase Realtime behind the same api surface so Colyseus remains swappable (AGENTS §13).

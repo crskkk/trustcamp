@@ -1,0 +1,11 @@
+name: world
+description: >
+  The React iframe host for the embedded Unity WebGL world. Renders the iframe
+  at /unity/Build/index.html, installs the bridge on mount, and shows a
+  localized loading overlay until the build loads. Calls bridge.joinWorld() on
+  load to prove the Unity↔shell pipe. The actual Unity build is task 0003.
+version: 0.2.0
+api: src/modules/world/api.ts
+depends_on:
+  - bridge
+  - i18n

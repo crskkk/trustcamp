@@ -8,9 +8,9 @@ describe("App shell", () => {
     expect(screen.getByText("TrustCamp")).toBeInTheDocument();
   });
 
-  it("mounts the Unity placeholder", () => {
+  it("mounts the embedded world", () => {
     render(<App />);
-    expect(screen.getByTestId("unity-placeholder")).toBeInTheDocument();
+    expect(screen.getByTestId("world-embed")).toBeInTheDocument();
   });
 
   it("mounts the dev-only System Status panel", () => {

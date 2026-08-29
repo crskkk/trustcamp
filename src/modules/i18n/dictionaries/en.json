@@ -2,6 +2,8 @@
   "app.title": "TrustCamp",
   "app.subtitle": "A mini-planet camping world. Under construction.",
   "unity.placeholder": "Unity world mounts here (task 0002+)",
+  "world.title": "TrustCamp world",
+  "world.loading": "Loading world…",
   "status.title": "System Status",
   "status.workers": "Workers",
   "status.tests": "Tests passing",

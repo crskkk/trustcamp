@@ -38,15 +38,32 @@ body {
 
 .tc-app p { color: #9fb0e0; max-width: 38ch; }
 
-.tc-unity-placeholder {
+/* World embed (task 0002) — hosts the Unity WebGL iframe */
+.tc-world {
+  position: relative;
   margin-top: 2rem;
-  width: min(80vw, 640px);
+  width: min(90vw, 900px);
   aspect-ratio: 16 / 9;
-  border: 2px dashed #2a3358;
+  border: 2px solid #2a3358;
   border-radius: 1rem;
+  overflow: hidden;
+  background: #05080f;
+}
+.tc-world-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.tc-world-loading {
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
-  color: #5e6fa8;
+  background: rgba(5, 8, 15, 0.85);
+  color: #9fb0e0;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
 }
 
 /* System Status panel (dev-only, temporary — task 0001) */

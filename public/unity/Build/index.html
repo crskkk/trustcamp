@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrustCamp Unity (placeholder)</title>
+    <style>
+      /* TASK 0002 PLACEHOLDER BUILD — not a real Unity WebGL build.
+         The real build (task 0003, `pnpm dev:unity`) overwrites this file. */
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: radial-gradient(120% 120% at 50% 18%, #1a2240 0%, #05080f 70%);
+        overflow: hidden;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      .stage {
+        position: relative;
+        height: 100%;
+        display: grid;
+        place-items: center;
+      }
+      /* A shaded sphere via CSS radial gradient — proves the canvas isn't black. */
+      .sphere {
+        position: relative;
+        width: min(38vw, 38vh);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 35% 30%, #ffd9a8 0%, #ff9d5c 18%, #c25a2e 45%, #5a2210 80%, #1a0a04 100%);
+        box-shadow: inset -18px -16px 40px rgba(0,0,0,0.55), 0 0 60px rgba(255, 157, 92, 0.25);
+      }
+      .watermark {
+        position: absolute;
+        top: 0.6rem;
+        left: 0.8rem;
+        font-size: 0.7rem;
+        letter-spacing: 0.04em;
+        color: #6f80c0;
+        opacity: 0.85;
+      }
+      .status {
+        position: absolute;
+        bottom: 0.6rem;
+        right: 0.8rem;
+        font-size: 0.72rem;
+        color: #6f80c0;
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="watermark">UNITY PLACEHOLDER · task 0002</div>
+      <div class="sphere" data-testid="unity-sphere"></div>
+      <div class="status" id="status">standby</div>
+    </div>
+    <script>
+      // The shell→Unity door: the shell calls UnityGame.SendMessage(go, method, arg).
+      window.UnityGame = {
+        SendMessage: function (go, method, arg) {
+          document.getElementById("status").textContent = "recv: " + go + "." + method + "(" + arg + ")";
+        },
+      };
+
+      // The Unity→shell door: call up to the parent's bridge (installed by the shell).
+      (function () {
+        var statusEl = document.getElementById("status");
+        function parentBridge() {
+          try { return window.parent && window.parent.__tcBridge; } catch (e) { return null; }
+        }
+        window.addEventListener("load", function () {
+          var b = parentBridge();
+          if (b && typeof b.joinWorld === "function") {
+            b.joinWorld().then(function (r) {
+              statusEl.textContent = "joinWorld ok · " + (r && r.sessionId ? String(r.sessionId).slice(0, 8) : "?");
+            }).catch(function () { statusEl.textContent = "joinWorld error"; });
+          } else {
+            statusEl.textContent = "bridge not mounted";
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

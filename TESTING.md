@@ -10,12 +10,14 @@ it fails.
 
 ## M1 — Foundation (v0.x)
 
-**T-1 Dev run & planet**
+**T-1 Dev run & embed**
 1. `pnpm dev` and open the printed URL on desktop + viewport.
-2. You must see the shell chrome (HUD placeholder + screensaver button) with the
-   iframe below.
-3. The Unity world renders a spherical planet: forest, lake, camp, mountains.
-4. Expected: no black screen, no loader hang, no console errors.
+2. You must see the shell chrome (title + status panel) with the embedded
+   Unity iframe below.
+3. The embed loads `public/unity/Build/index.html` and shows a shaded sphere
+   (placeholder build until task 0003 ships the real planet).
+4. The browser console logs `[bridge] joinWorld ok <sessionId>`.
+5. Expected: no black screen, no loader hang, no console errors.
    If fail: don't merge; fix scope.
 
 **T-2 Workers green (v0.x gate)**
