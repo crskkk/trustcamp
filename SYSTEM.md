@@ -17,14 +17,14 @@
 - **depends_on:** i18n
 - **description:** TEMPORARY dev-only System Status overlay (task 0001). Renders live worker status lights, test pass %, SYSTEM.md preview, and the version chip. This module is the temporary visual artifact required by GAUNTLET.md §1 for a backend component; it is absorbed by the real HUD (task 0006) or Admin panel (task 0306) and this folder is removed at that time.
 
+### bridge `0.4.0`
+
+- **api:** `src/modules/bridge/api.ts`
+- **depends_on:** —
+- **description:** The realtime transport door. Exposes joinWorld/leaveWorld/sendState/onState and mounts the Unity-facing window.__tcBridge. The backing transport is Supabase Realtime (task 0004) with in-memory fallback; task 0005+ may swap for Colyseus behind the same api surface (AGENTS §13).
+
 ### i18n `0.1.0`
 
 - **api:** `src/modules/i18n/api.ts`
 - **depends_on:** —
 - **description:** Localization module. Exposes t(key, lang) and detectLang(). Holds the en/es/pt dictionaries. Other modules must not hold user-facing string literals; they call this module's api. The i18n-check worker verifies coverage against these dictionaries.
-
-### bridge `0.2.0`
-
-- **api:** `src/modules/bridge/api.ts`
-- **depends_on:** —
-- **description:** The realtime transport door. Exposes joinWorld/leaveWorld/sendState/onState and mounts the Unity-facing window.__tcBridge. The backing transport is an in-memory stub (task 0002); task 0004 swaps it for Supabase Realtime behind the same api surface so Colyseus remains swappable (AGENTS §13).

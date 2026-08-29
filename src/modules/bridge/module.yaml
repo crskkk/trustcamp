@@ -1,9 +1,9 @@
 name: bridge
 description: >
   The realtime transport door. Exposes joinWorld/leaveWorld/sendState/onState
-  and mounts the Unity-facing window.__tcBridge. The backing transport is an
-  in-memory stub (task 0002); task 0004 swaps it for Supabase Realtime behind
-  the same api surface so Colyseus remains swappable (AGENTS §13).
-version: 0.2.0
+  and mounts the Unity-facing window.__tcBridge. The backing transport is
+  Supabase Realtime (task 0004) with in-memory fallback; task 0005+ may swap
+  for Colyseus behind the same api surface (AGENTS §13).
+version: 0.4.0
 api: src/modules/bridge/api.ts
 depends_on: []

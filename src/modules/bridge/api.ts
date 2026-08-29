@@ -1,8 +1,9 @@
 // src/modules/bridge/api.ts — the ONLY public door to the bridge module.
 // The realtime transport Unity talks through. Surface is stable; the backing
-// transport is an in-memory stub now (task 0002) and becomes Supabase Realtime
-// in task 0004 — without changing this api or any caller (AGENTS §13).
+// transport is Supabase Realtime (task 0004) with in-memory fallback —
+// without changing this api or any caller (AGENTS §13).
 import { Emitter } from "./internal/emitter";
+import { isConfigured as isSupabaseConfigured, joinChannel, leaveChannel, broadcastState, onState as supabaseOnState, initSupabase as initSupabaseImpl } from "./internal/supabase";
 
 export interface WorldState {
   playerId: string;
@@ -23,32 +24,56 @@ const stateBus = new Emitter<WorldState>();
 let session: string | null = null;
 
 function newSessionId(): string {
-  // Opaque, non-PII. crypto.randomUUID when available, else a fallback.
   const g = globalThis as { crypto?: { randomUUID?: () => string } };
   if (g.crypto?.randomUUID) return g.crypto.randomUUID();
   return "sess-" + Math.random().toString(36).slice(2, 12);
 }
 
+/** Initialize Supabase Realtime. Call once at app startup if VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set. */
+export async function initSupabase(url: string, anonKey: string): Promise<void> {
+  const { initSupabase: impl } = await import("./internal/supabase");
+  impl(url, anonKey);
+}
+
+/** Check if Supabase Realtime is configured and ready. */
+export function isConfigured(): boolean {
+  return isSupabaseConfigured();
+}
+
 /** Join the shared world. Resolves with an opaque session id. */
 export async function joinWorld(): Promise<JoinResult> {
   session = newSessionId();
-  // eslint-disable-next-line no-console
-  console.log("[bridge] joinWorld ok", session);
+  if (isSupabaseConfigured()) {
+    await joinChannel(session);
+    console.log("[bridge] joinWorld ok (supabase)", session);
+  } else {
+    console.log("[bridge] joinWorld ok (memory)", session);
+  }
   return { ok: true, sessionId: session };
 }
 
 /** Leave the world. */
 export async function leaveWorld(): Promise<void> {
+  if (isSupabaseConfigured()) {
+    leaveChannel();
+  }
   session = null;
 }
 
 /** Push local state into the world (broadcast to subscribers). */
 export async function sendState(state: WorldState): Promise<void> {
-  stateBus.emit(state);
+  if (isSupabaseConfigured()) {
+    broadcastState(state);
+  } else {
+    stateBus.emit(state);
+  }
 }
 
 /** Subscribe to world state updates. Returns an unsubscribe fn. */
 export function onState(cb: (state: WorldState) => void): Unsubscribe {
+  if (isSupabaseConfigured()) {
+    return supabaseOnState(cb);
+  }
   return stateBus.subscribe(cb);
 }
 

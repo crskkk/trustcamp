@@ -1,6 +1,6 @@
 # ROADMAP.md — Versioned Priorities & Integration Strategy
 
-**Current version: v0.3** (StatusPanel reads this line to render the version chip.)
+**Current version: v0.4** (StatusPanel reads this line to render the version chip.)
 
 Versions use **dot-versioning** `vX.Y`: X = milestone (phase of the world), Y = task
 merged within that phase. Every merged task bumps Y. Milestone gates (M1–M4 below)
@@ -8,6 +8,7 @@ must ALL pass before X increments. Current version moves forward one merge at a 
 see git history for the up-to-date value.
 
 ## Merged
+- `v0.4` — 0004 Supabase Realtime bridge transport (with in-memory fallback).
 - `v0.3` — 0003 spherical planet scaffold (real Unity project + procedural biomes + WebGL build).
 - `v0.2` — 0002 Unity WebGL embed harness + bridge api stub + placeholder build.
 - `v0.1` — 0001 worker spine + repo bootstrap + dev-only System Status panel.
