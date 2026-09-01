@@ -1,6 +1,6 @@
 # ROADMAP.md — Versioned Priorities & Integration Strategy
 
-**Current version: v0.10** (StatusPanel reads this line to render the version chip.)
+**Current version: v1.1** (StatusPanel reads this line to render the version chip.)
 
 Versions use **dot-versioning** `vX.Y`: X = milestone (phase of the world), Y = task
 merged within that phase. Every merged task bumps Y. Milestone gates (M1–M4 below)
@@ -8,6 +8,7 @@ must ALL pass before X increments. Current version moves forward one merge at a 
 see git history for the up-to-date value.
 
 ## Merged
+- `v1.1` — 0101 Camera & player controller (sphere-walk `PlayerController.Step()`, chase `PlayerCamera`, opt-in `PlayerSpawner`; MotionSmoke edit tests). **Core (v1) begins — M1 gate passed.**
 - `v0.10` — 0010 Scorebus skeleton (round-envelope schema + validator + in-memory ingest sink; TS↔Unity mirror). Foundation complete.
 - `v0.9` — 0009 Screensaver skeleton (shell-driven camera orbit over the planet, `/screensaver` route, detach hook for host steering).
 - `v0.8` — 0008 Avatar Foundation (seed schema, deterministic generation, cute low-poly renderer).

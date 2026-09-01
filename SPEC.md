@@ -40,8 +40,7 @@ Rules:
 
 ## Stubs (v1.x Core, promote on demand)
 
-- `0101` Camera & player controller (`unity/`, red: `MotionSmoke` edit test asserting
-  a configured walk path reaches been-visited checkpoints).
+- `0101` Camera & player controller — FULL prompt: [`.claude/tasks/0101-camera-player-controller.md`](.claude/tasks/0101-camera-player-controller.md). **Merged v1.1.**
 - `0102` Realtime presence wireup (`src/modules/bridge` consumer, red: Playwright
   two-tab presence test).
 - `0103` NPC spawner (same avatar pipeline; `Spawn` orchestrates Prospect camo).
