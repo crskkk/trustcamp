@@ -1,0 +1,12 @@
+name: avatar
+description: >
+  Avatar seed schema and deterministic generator. Shared between TS and Unity:
+  same seed produces bit-identical avatars on both sides. No PII stored or
+  customized; appearance is fully procedural from seed. Cute, emotionally
+  expressive low-poly characters with 10,000+ unique combinations.
+version: 0.1.0
+api: src/modules/avatar/api.ts
+depends_on: []
+privacy:
+  claims_used: []
+  pii_forbidden: ["name", "email", "picture", "custom attributes"]

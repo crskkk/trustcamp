@@ -5,11 +5,11 @@
 
 ## Modules
 
-### world `0.2.0`
+### avatar `0.1.0`
 
-- **api:** `src/modules/world/api.ts`
-- **depends_on:** bridge, i18n
-- **description:** The React iframe host for the embedded Unity WebGL world. Renders the iframe at /unity/Build/index.html, installs the bridge on mount, and shows a localized loading overlay until the build loads. Calls bridge.joinWorld() on load to prove the Unity↔shell pipe. The actual Unity build is task 0003.
+- **api:** `src/modules/avatar/api.ts`
+- **depends_on:** —
+- **description:** Avatar seed schema and deterministic generator. Shared between TS and Unity: same seed produces bit-identical avatars on both sides. No PII stored or customized; appearance is fully procedural from seed. Cute, emotionally expressive low-poly characters with 10,000+ unique combinations.
 
 ### statuspanel `0.1.0`
 
@@ -17,20 +17,32 @@
 - **depends_on:** i18n
 - **description:** TEMPORARY dev-only System Status overlay (task 0001). Renders live worker status lights, test pass %, SYSTEM.md preview, and the version chip. This module is the temporary visual artifact required by GAUNTLET.md §1 for a backend component; it is absorbed by the real HUD (task 0006) or Admin panel (task 0306) and this folder is removed at that time.
 
+### world `0.2.0`
+
+- **api:** `src/modules/world/api.ts`
+- **depends_on:** bridge, i18n
+- **description:** The React iframe host for the embedded Unity WebGL world. Renders the iframe at /unity/Build/index.html, installs the bridge on mount, and shows a localized loading overlay until the build loads. Calls bridge.joinWorld() on load to prove the Unity↔shell pipe. The actual Unity build is task 0003.
+
 ### i18n `0.1.0`
 
 - **api:** `src/modules/i18n/api.ts`
 - **depends_on:** —
 - **description:** Localization module. Exposes t(key, lang) and detectLang(). Holds the en/es/pt dictionaries. Other modules must not hold user-facing string literals; they call this module's api. The i18n-check worker verifies coverage against these dictionaries.
 
-### hud `0.1.0`
+### lti `0.1.0`
 
-- **api:** `src/modules/hud/api.tsx`
-- **depends_on:** i18n
-- **description:** The persistent HUD chrome. Renders the score / role / level / items / notifications / avatar / leaderboard placeholders, a language toggle (en/es/pt), and a collapse-to-one-button behavior. All user-facing strings go through the i18n module's dictionaries. Other modules reach the HUD only through this module's api file.
+- **api:** `src/modules/lti/api.ts`
+- **depends_on:** —
+- **description:** LTI 1.3 Phase C scaffold: OIDC login handler, JWT validation, and session token emit with privacy-first design. Only the opaque 'sub' claim is used; no PII (name, email, etc.) is ever requested or stored.
 
 ### bridge `0.4.0`
 
 - **api:** `src/modules/bridge/api.ts`
 - **depends_on:** —
 - **description:** The realtime transport door. Exposes joinWorld/leaveWorld/sendState/onState and mounts the Unity-facing window.__tcBridge. The backing transport is Supabase Realtime (task 0004) with in-memory fallback; task 0005+ may swap for Colyseus behind the same api surface (AGENTS §13).
+
+### hud `0.1.0`
+
+- **api:** `src/modules/hud/api.tsx`
+- **depends_on:** i18n
+- **description:** The persistent HUD chrome. Renders the score / role / level / items / notifications / avatar / leaderboard placeholders, a language toggle (en/es/pt), and a collapse-to-one-button behavior. All user-facing strings go through the i18n module's dictionaries. Other modules reach the HUD only through this module's api file.

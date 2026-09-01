@@ -1,0 +1,14 @@
+{
+  "name": "TrustCamp.Avatar",
+  "rootNamespace": "TrustCamp.Avatar",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
