@@ -30,7 +30,10 @@ function render(modules: ModuleEntry[]): string {
     lines.push("_No modules registered yet._", "");
     return lines.join("\n");
   }
-  for (const m of modules) {
+  // Deterministic order — the glob/readdir order is not stable across machines,
+  // and SYSTEM.md drift is a CI blocker.
+  const ordered = [...modules].sort((a, b) => a.yaml.name.localeCompare(b.yaml.name));
+  for (const m of ordered) {
     lines.push(
       `### ${m.yaml.name} \`${m.yaml.version}\``,
       "",
