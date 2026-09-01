@@ -1,10 +1,15 @@
+import { useEffect } from "react";
 import { t } from "./modules/i18n/api";
 import { useHudLang } from "./modules/hud/api";
 import { StatusPanel } from "./modules/statuspanel/StatusPanel";
 import { WorldEmbed } from "./modules/world/api";
 import { Hud } from "./modules/hud/api";
+import { startOrbit, stopOrbit } from "./modules/screensaver/api";
 
 export function App() {
+  if (typeof window !== "undefined" && window.location.pathname === "/screensaver") {
+    return <Screensaver />;
+  }
   return (
     <div className="tc-app">
       <Hud>
@@ -12,6 +17,23 @@ export function App() {
         <WorldEmbed />
       </Hud>
       {import.meta.env.DEV && <StatusPanel />}
+    </div>
+  );
+}
+
+/**
+ * Screensaver / landing mode (task 0009): the planet full-bleed with no HUD
+ * chrome, camera auto-orbiting under shell control. The detach hook
+ * (window.__tcScreensaver.stop) is where host steering lands later.
+ */
+function Screensaver(): JSX.Element {
+  useEffect(() => {
+    startOrbit();
+    return () => stopOrbit();
+  }, []);
+  return (
+    <div className="tc-app">
+      <WorldEmbed />
     </div>
   );
 }

@@ -1,0 +1,11 @@
+name: screensaver
+description: >
+  Screensaver / landing mode: a shell-driven camera orbit over the embedded
+  Unity planet. The shell owns the yaw and feeds Unity's OrbitCamera each tick,
+  so host/admin steering can take over the same seam later. Exposes
+  startOrbit / stopOrbit / isOrbiting / getYaw and a window.__tcScreensaver
+  dev hook. Task 0009 — render-path proof.
+version: 0.1.0
+api: src/modules/screensaver/api.ts
+depends_on:
+  - bridge

@@ -35,6 +35,12 @@
 - **depends_on:** —
 - **description:** LTI 1.3 Phase C scaffold: OIDC login handler, JWT validation, and session token emit with privacy-first design. Only the opaque 'sub' claim is used; no PII (name, email, etc.) is ever requested or stored.
 
+### screensaver `0.1.0`
+
+- **api:** `src/modules/screensaver/api.ts`
+- **depends_on:** bridge
+- **description:** Screensaver / landing mode: a shell-driven camera orbit over the embedded Unity planet. The shell owns the yaw and feeds Unity's OrbitCamera each tick, so host/admin steering can take over the same seam later. Exposes startOrbit / stopOrbit / isOrbiting / getYaw and a window.__tcScreensaver dev hook. Task 0009 — render-path proof.
+
 ### statuspanel `0.1.0`
 
 - **api:** `src/modules/statuspanel/StatusPanel.tsx`
