@@ -62,10 +62,17 @@ namespace TrustCamp.World
 
         private void EnsureBiomeRoots()
         {
+            // Reuse the biome roots but wipe their contents, so Generate() rebuilds
+            // from scratch instead of stacking a second set of props on top of the
+            // ones baked into the scene by SetupScene.
             _forest = FindOrCreate(BiomeForest);
             _lake = FindOrCreate(BiomeLake);
             _camp = FindOrCreate(BiomeCamp);
             _mountains = FindOrCreate(BiomeMountains);
+            ClearChildren(_forest);
+            ClearChildren(_lake);
+            ClearChildren(_camp);
+            ClearChildren(_mountains);
         }
 
         private GameObject FindOrCreate(string name)
@@ -75,6 +82,16 @@ namespace TrustCamp.World
             var go = new GameObject(name);
             go.transform.SetParent(transform, false);
             return go;
+        }
+
+        private static void ClearChildren(GameObject root)
+        {
+            for (int i = root.transform.childCount - 1; i >= 0; i--)
+            {
+                var child = root.transform.GetChild(i).gameObject;
+                if (Application.isPlaying) Destroy(child);
+                else DestroyImmediate(child);
+            }
         }
 
         // --- Mesh: icosphere -> displaced -> vertex-colored by biome ---
@@ -306,7 +323,20 @@ namespace TrustCamp.World
             {
                 if (_vcolorMat != null) return _vcolorMat;
                 var sh = Shader.Find("TrustCamp/UnlitVertexColor");
-                if (sh == null) sh = Shader.Find("Unlit/Color"); // fallback (no vertex colors)
+                if (sh == null)
+                {
+                    // The vertex-color shader was stripped from the build → the
+                    // planet renders flat white. Surface it loudly (a smoke test
+                    // asserts on this line).
+                    Debug.LogWarning("[PlanetGenerator] 'TrustCamp/UnlitVertexColor' not found — " +
+                        "falling back to Unlit/Color; biome colours will not render. " +
+                        "Add the shader to Always-Included Shaders.");
+                    sh = Shader.Find("Unlit/Color");
+                }
+                else
+                {
+                    Debug.Log("[PlanetGenerator] vertex-color shader OK");
+                }
                 _vcolorMat = new Material(sh);
                 return _vcolorMat;
             }

@@ -62,6 +62,16 @@ namespace TrustCamp.Avatar
                 return; // Already spawned
             }
 
+            // Defensive: adopt a panel left by an earlier run or a second
+            // integration component rather than stacking a duplicate set.
+            var existing = GameObject.Find("AvatarShowcasePanel");
+            if (existing != null)
+            {
+                showcasePanel = existing;
+                showcaseActive = true;
+                return;
+            }
+
             var planet = Object.FindFirstObjectByType<PlanetGenerator>();
 
             showcasePanel = new GameObject("AvatarShowcasePanel");

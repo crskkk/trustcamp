@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TrustCamp.Avatar
@@ -61,16 +62,25 @@ namespace TrustCamp.Avatar
             hair.transform.SetParent(head.transform, false);
         }
 
-        // Avatars never need collision. Physics code is stripped from the WebGL
-        // build, so CreatePrimitive there logs a benign "collider class doesn't
-        // exist" line and adds no collider; on other platforms we drop it.
+        // Physics code is stripped from the WebGL build, so CreatePrimitive there
+        // logs a benign "collider class doesn't exist" line. Extract each builtin
+        // mesh once, cache it, and build the parts as plain MeshFilter/MeshRenderer
+        // objects — so the warning fires at most once per primitive type, ever.
+        private static readonly Dictionary<PrimitiveType, Mesh> _meshCache = new();
+
         private static GameObject SolidPrimitive(PrimitiveType type)
         {
-            GameObject go = GameObject.CreatePrimitive(type);
-            if (go.TryGetComponent(out Collider col))
+            if (!_meshCache.TryGetValue(type, out Mesh mesh) || mesh == null)
             {
-                Destroy(col);
+                GameObject tmp = GameObject.CreatePrimitive(type);
+                mesh = tmp.GetComponent<MeshFilter>().sharedMesh;
+                _meshCache[type] = mesh;
+                DestroyImmediate(tmp);
             }
+
+            var go = new GameObject(type.ToString());
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            go.AddComponent<MeshRenderer>();
             return go;
         }
 

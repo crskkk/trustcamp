@@ -18,3 +18,35 @@ test("planet renders a non-black WebGL canvas", async ({ page }) => {
   const w = await canvas.evaluate((el) => (el as HTMLCanvasElement).width);
   expect(w).toBeGreaterThan(0);
 });
+
+// Guards the regressions that shipped silently before (white planet from a
+// stripped vertex-color shader; avatars missing / invisible). Unity's Debug.Log
+// lines surface in the page console, so we can assert on them without pixels.
+test("planet shader resolves and the avatar showcase spawns", async ({ page }) => {
+  const logs: string[] = [];
+  page.on("console", (msg) => logs.push(msg.text()));
+
+  await page.goto("/");
+  const canvas = page
+    .locator('iframe[src*="/unity/Build/index.html"]')
+    .contentFrame()
+    .locator("canvas");
+  await expect(canvas).toBeVisible({ timeout: 30_000 });
+
+  // Give the scene's Start() a moment to run after the loader finishes.
+  await expect
+    .poll(() => logs.some((l) => l.includes("Avatar Showcase spawned near camp")), {
+      timeout: 30_000,
+    })
+    .toBe(true);
+
+  const joined = logs.join("\n");
+  expect(joined, "vertex-color shader fell back — planet would render flat white").not.toContain(
+    "falling back to Unlit/Color",
+  );
+  expect(joined).toContain("[PlanetGenerator] vertex-color shader OK");
+  // All four fixed-seed avatars reached the surface.
+  for (const seed of [1, 42, 12345, 999999]) {
+    expect(joined, `avatar ${seed} did not spawn`).toContain(`Avatar ${seed} spawned at`);
+  }
+});
