@@ -7620,6 +7620,7 @@ GameObject:
   - component: {fileID: 761595617}
   - component: {fileID: 761595616}
   - component: {fileID: 761595615}
+  - component: {fileID: 761595618}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: Untagged
@@ -7709,6 +7710,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &761595618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 761595614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b27ab52fd69f9ae48b3acf3171b823b8, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: TrustCamp.Avatar::TrustCamp.Avatar.AvatarShowcaseIntegration
+  showcaseDistance: 10
+  autoSpawnOnStart: 1
+  toggleKey: 72
 --- !u!21 &762917928
 Material:
   serializedVersion: 8
