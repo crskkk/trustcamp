@@ -53,27 +53,19 @@ namespace TrustCamp.Avatar
                 return; // Already spawned
             }
 
-            // Create showcase panel
+            // Create showcase panel at fixed world location (visible in default view)
             showcasePanel = new GameObject("AvatarShowcasePanel");
 
-            // Position in front of camera
-            Camera mainCamera = Camera.main;
-            if (mainCamera != null)
-            {
-                Vector3 cameraForward = mainCamera.transform.forward;
-                showcasePanel.transform.position = mainCamera.transform.position +
-                                                    cameraForward * showcaseDistance;
-                showcasePanel.transform.LookAt(mainCamera.transform.position);
-            }
-            else
-            {
-                showcasePanel.transform.position = Vector3.forward * showcaseDistance;
-            }
+            // Position at origin, slightly elevated (center of planet area)
+            showcasePanel.transform.position = new Vector3(0, 2, -15);
+            showcasePanel.transform.rotation = Quaternion.identity;
 
             // Add showcase component
             AvatarShowcase showcase = showcasePanel.AddComponent<AvatarShowcase>();
 
             showcaseActive = true;
+
+            Debug.Log("Avatar Showcase spawned at: " + showcasePanel.transform.position);
         }
 
         public void HideShowcase()

@@ -37,6 +37,8 @@ namespace TrustCamp.Avatar
             avatarRoot.transform.SetParent(transform);
             avatarRoot.transform.localPosition = Vector3.zero;
 
+            Debug.Log($"Building avatar: skinTone={spec.skinTone}, hair={spec.hairStyle}/{spec.hairColor}, eyes={spec.eyeColor}");
+
             // Build body (cube, chibi proportions)
             GameObject body = CreateBody(spec);
             body.transform.SetParent(avatarRoot.transform);
