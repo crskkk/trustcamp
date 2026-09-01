@@ -35,6 +35,12 @@
 - **depends_on:** —
 - **description:** LTI 1.3 Phase C scaffold: OIDC login handler, JWT validation, and session token emit with privacy-first design. Only the opaque 'sub' claim is used; no PII (name, email, etc.) is ever requested or stored.
 
+### scorebus `0.1.0`
+
+- **api:** `src/modules/scorebus/api.ts`
+- **depends_on:** —
+- **description:** The round-based scoring pipeline's schema + ingest boundary. Exposes the RoundEnvelope type, validateEnvelope(), and createSink() — an in-memory accept/reject/count/drain sink with an onAccept seam. Envelopes carry only opaque ids; any profile claim is rejected at the door (AGENTS §5). The Unity mirror lives in unity/Assets/Scorebus/. Task 0010 — skeleton only.
+
 ### screensaver `0.1.0`
 
 - **api:** `src/modules/screensaver/api.ts`

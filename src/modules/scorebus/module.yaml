@@ -1,0 +1,10 @@
+name: scorebus
+description: >
+  The round-based scoring pipeline's schema + ingest boundary. Exposes the
+  RoundEnvelope type, validateEnvelope(), and createSink() — an in-memory
+  accept/reject/count/drain sink with an onAccept seam. Envelopes carry only
+  opaque ids; any profile claim is rejected at the door (AGENTS §5). The Unity
+  mirror lives in unity/Assets/Scorebus/. Task 0010 — skeleton only.
+version: 0.1.0
+api: src/modules/scorebus/api.ts
+depends_on: []
