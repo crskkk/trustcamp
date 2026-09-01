@@ -11,7 +11,7 @@ test("status panel shows workers, tests, SYSTEM.md preview, and version chip", a
   await expect(page.getByText("bundle:guard")).toBeVisible();
   // Test pass line (format "N / M") and version chip both present.
   await expect(page.getByText(/\d+ \/ \d+/)).toBeVisible();
-  await expect(page.getByText(/^v0\.\d+$/)).toBeVisible();
+  await expect(page.getByText(/^v\d+\.\d+$/)).toBeVisible();
   // SYSTEM.md preview visible somewhere.
   await expect(page.getByText("## Modules")).toBeVisible();
 });
