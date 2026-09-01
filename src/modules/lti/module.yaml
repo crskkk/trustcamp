@@ -1,0 +1,22 @@
+name: lti
+description: >
+  LTI 1.3 Phase C scaffold: OIDC login handler, JWT validation,
+  and session token emit with privacy-first design.
+  Only the opaque 'sub' claim is used; no PII (name, email, etc.)
+  is ever requested or stored.
+version: 0.1.0
+api: src/modules/lti/api.ts
+depends_on: []
+privacy:
+  claims_used:
+    - sub  # opaque LTI user key
+  scopes:
+    - lineitem
+    - result
+    - membership
+  pii_forbidden:
+    - name
+    - email
+    - picture
+    - given_name
+    - family_name

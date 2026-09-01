@@ -33,5 +33,6 @@
   "hud.lang.en": "English",
   "hud.lang.es": "Español",
   "hud.lang.pt": "Português",
-  "hud.lang.label": "Language"
+  "hud.lang.label": "Language",
+  "lti.launch_ok": "Launch OK"
 }

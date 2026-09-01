@@ -1,6 +1,12 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, beforeEach } from "vitest";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { App } from "./App";
+
+// Reset localStorage between tests
+beforeEach(() => {
+  localStorage.clear();
+  cleanup();
+});
 
 describe("App shell", () => {
   it("renders the localized title", () => {
@@ -8,14 +14,27 @@ describe("App shell", () => {
     expect(screen.getByText("TrustCamp")).toBeInTheDocument();
   });
 
-  it("mounts the embedded world", () => {
+  it("renders the localized subtitle (defaults to English)", () => {
     render(<App />);
-    expect(screen.getByTestId("world-embed")).toBeInTheDocument();
+    expect(screen.getByText("A mini-planet camping world. Under construction.")).toBeInTheDocument();
   });
 
-  it("mounts the dev-only System Status panel", () => {
+  it("subtitle updates when language is changed via HUD toggle", () => {
     render(<App />);
-    // The panel reads i18n key status.title in English by default.
-    expect(screen.getByText("System Status")).toBeInTheDocument();
+    
+    // Initial English subtitle
+    expect(screen.getByText(/mini-planet camping world/i)).toBeInTheDocument();
+    
+    // Click Spanish language button
+    fireEvent.click(screen.getByTestId("hud-lang-es"));
+    
+    // Subtitle should now be in Spanish
+    expect(screen.getByText(/mini-planeta/i)).toBeInTheDocument();
+    
+    // Click Portuguese language button
+    fireEvent.click(screen.getByTestId("hud-lang-pt"));
+    
+    // Subtitle should now be in Portuguese
+    expect(screen.getByText(/mini-planeta/i)).toBeInTheDocument();
   });
 });
