@@ -16,6 +16,9 @@ namespace TrustCamp.EditorTools
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
             PlayerSettings.WebGL.dataCaching = true;
             PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.FullWithStacktrace;
+            // Full-bleed canvas: the embedded iframe wants the player to fill it,
+            // not center a fixed 960x600 canvas. See Assets/WebGLTemplates/TrustCamp/.
+            PlayerSettings.WebGL.template = "PROJECT:TrustCamp";
 
             string projectRoot = FindRepoRoot();
             string outDir = Path.Combine(projectRoot, "public", "unity", "Build");
@@ -34,7 +37,9 @@ namespace TrustCamp.EditorTools
             BuildReport report = BuildPipeline.BuildPlayer(opts);
             int code = report.summary.result == BuildResult.Succeeded ? 0 : 1;
             Debug.Log($"[BuildScript] WebGL build result={report.summary.result} (code {code}) -> {outDir}");
-            if (code != 0) EditorApplication.Exit(code);
+            // Always exit: batchmode is launched without -quit, so on the success
+            // path the Editor would otherwise sit idle until dev-unity.js times out.
+            EditorApplication.Exit(code);
         }
 
         private static string FindRepoRoot()

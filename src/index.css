@@ -18,34 +18,32 @@ body {
 }
 
 .tc-app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.tc-app-subtitle {
+  position: fixed;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  margin: 0;
+  z-index: 11;
+  max-width: min(90vw, 40ch);
   text-align: center;
-  padding: 2rem;
+  font-size: 0.8rem;
+  color: #9fb0e0;
+  opacity: 0.7;
+  pointer-events: none;
 }
 
-.tc-app h1 {
-  font-size: clamp(2rem, 6vw, 4rem);
-  margin: 0 0 0.5rem;
-  background: linear-gradient(120deg, var(--tc-accent), #36d3ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.tc-app p { color: #9fb0e0; max-width: 38ch; }
-
-/* World embed (task 0002) — hosts the Unity WebGL iframe */
+/* World embed (task 0002) — hosts the Unity WebGL iframe, full-window. */
 .tc-world {
-  position: relative;
-  margin-top: 2rem;
-  width: min(90vw, 900px);
-  aspect-ratio: 16 / 9;
-  border: 2px solid #2a3358;
-  border-radius: 1rem;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   background: #05080f;
 }

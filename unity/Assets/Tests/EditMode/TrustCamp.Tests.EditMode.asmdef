@@ -4,7 +4,8 @@
         "UnityEngine",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "TrustCamp.World"
+        "TrustCamp.World",
+        "TrustCamp.Avatar"
     ],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],

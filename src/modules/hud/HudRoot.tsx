@@ -2,7 +2,8 @@
 //
 // Pure presentation: receives the resolved labels and the current state
 // from the api, and renders the top bar + collapse toggle. The collapsed
-// state shows exactly one button (STANDARDS §6.1).
+// state shows exactly one button (STANDARDS §6.1). The planet ("children")
+// is a full-window layer behind the bar and stays mounted in both states.
 import type { ReactNode } from "react";
 import type { HudLang } from "./api";
 
@@ -37,79 +38,91 @@ export function HudRoot(props: HudRootProps): JSX.Element {
   const { collapsed, labels, onToggleCollapsed, onSetLang, lang, children } = props;
 
   return (
-    <header
-      className={`tc-hud${collapsed ? " tc-hud--collapsed" : ""}`}
-      data-testid="hud-root"
-      data-lang={lang}
-      aria-label={labels.title}
-    >
-      <div className="tc-hud-bar">
-        <span className="tc-hud-title" data-testid="hud-title">{labels.title}</span>
+    <>
+      {/* The planet fills the window and keeps rendering whether the HUD is
+          expanded or collapsed. It is a sibling of <header> (not a child) so the
+          "collapsed = one button" checks that scope to hud-root still hold. */}
+      {children ? (
+        <div
+          className={`tc-hud-stage${collapsed ? " tc-hud-stage--collapsed" : ""}`}
+          data-testid="hud-stage"
+        >
+          {children}
+        </div>
+      ) : null}
 
-        {!collapsed && (
-          <nav className="tc-hud-rows" aria-label={labels.title}>
-            <span className="tc-hud-row" data-testid="hud-row-score">
-              <span className="tc-hud-key">{labels.score}</span>
-            </span>
-            <span className="tc-hud-row" data-testid="hud-row-role">
-              <span className="tc-hud-key">{labels.role}</span>
-            </span>
-            <span className="tc-hud-row" data-testid="hud-row-level">
-              <span className="tc-hud-key">{labels.level}</span>
-            </span>
-            <span className="tc-hud-row" data-testid="hud-row-items">
-              <span className="tc-hud-key">{labels.items}</span>
-            </span>
-            <span className="tc-hud-row" data-testid="hud-row-notifications">
-              <span className="tc-hud-key">{labels.notifications}</span>
-            </span>
-            <span className="tc-hud-row" data-testid="hud-row-avatar">
-              <span className="tc-hud-key">{labels.avatar}</span>
-            </span>
-            <span className="tc-hud-row" data-testid="hud-row-leaderboard">
-              <span className="tc-hud-key">{labels.leaderboard}</span>
-            </span>
-          </nav>
-        )}
+      <header
+        className={`tc-hud${collapsed ? " tc-hud--collapsed" : ""}`}
+        data-testid="hud-root"
+        data-lang={lang}
+        aria-label={labels.title}
+      >
+        <div className="tc-hud-bar">
+          <span className="tc-hud-title" data-testid="hud-title">{labels.title}</span>
 
-        <div className="tc-hud-actions">
           {!collapsed && (
-            <div
-              className="tc-hud-lang"
-              role="group"
-              aria-label={labels.langLabel}
-              data-testid="hud-lang"
-            >
-              {(["en", "es", "pt"] as const).map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  className={`tc-hud-lang-btn${lang === l ? " is-active" : ""}`}
-                  aria-pressed={lang === l}
-                  aria-label={l === "en" ? labels.langEn : l === "es" ? labels.langEs : labels.langPt}
-                  onClick={() => onSetLang(l)}
-                  data-testid={`hud-lang-${l}`}
-                >
-                  {l.toUpperCase()}
-                </button>
-              ))}
-            </div>
+            <nav className="tc-hud-rows" aria-label={labels.title}>
+              <span className="tc-hud-row" data-testid="hud-row-score">
+                <span className="tc-hud-key">{labels.score}</span>
+              </span>
+              <span className="tc-hud-row" data-testid="hud-row-role">
+                <span className="tc-hud-key">{labels.role}</span>
+              </span>
+              <span className="tc-hud-row" data-testid="hud-row-level">
+                <span className="tc-hud-key">{labels.level}</span>
+              </span>
+              <span className="tc-hud-row" data-testid="hud-row-items">
+                <span className="tc-hud-key">{labels.items}</span>
+              </span>
+              <span className="tc-hud-row" data-testid="hud-row-notifications">
+                <span className="tc-hud-key">{labels.notifications}</span>
+              </span>
+              <span className="tc-hud-row" data-testid="hud-row-avatar">
+                <span className="tc-hud-key">{labels.avatar}</span>
+              </span>
+              <span className="tc-hud-row" data-testid="hud-row-leaderboard">
+                <span className="tc-hud-key">{labels.leaderboard}</span>
+              </span>
+            </nav>
           )}
 
-          <button
-            type="button"
-            className="tc-hud-toggle"
-            aria-label={collapsed ? labels.expand : labels.collapse}
-            aria-expanded={!collapsed}
-            onClick={onToggleCollapsed}
-            data-testid="hud-toggle"
-          >
-            {collapsed ? "≡" : "✕"}
-          </button>
-        </div>
-      </div>
+          <div className="tc-hud-actions">
+            {!collapsed && (
+              <div
+                className="tc-hud-lang"
+                role="group"
+                aria-label={labels.langLabel}
+                data-testid="hud-lang"
+              >
+                {(["en", "es", "pt"] as const).map((l) => (
+                  <button
+                    key={l}
+                    type="button"
+                    className={`tc-hud-lang-btn${lang === l ? " is-active" : ""}`}
+                    aria-pressed={lang === l}
+                    aria-label={l === "en" ? labels.langEn : l === "es" ? labels.langEs : labels.langPt}
+                    onClick={() => onSetLang(l)}
+                    data-testid={`hud-lang-${l}`}
+                  >
+                    {l.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            )}
 
-      {!collapsed && children ? <div className="tc-hud-children">{children}</div> : null}
-    </header>
+            <button
+              type="button"
+              className="tc-hud-toggle"
+              aria-label={collapsed ? labels.expand : labels.collapse}
+              aria-expanded={!collapsed}
+              onClick={onToggleCollapsed}
+              data-testid="hud-toggle"
+            >
+              {collapsed ? "≡" : "✕"}
+            </button>
+          </div>
+        </div>
+      </header>
+    </>
   );
 }

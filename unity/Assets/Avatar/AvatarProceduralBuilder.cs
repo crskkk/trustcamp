@@ -32,31 +32,46 @@ namespace TrustCamp.Avatar
                 Destroy(avatarRoot);
             }
 
-            // Create avatar hierarchy
+            // Create avatar hierarchy. SetParent(..., false) keeps the authored
+            // local offsets — without it the parts snap back toward world origin
+            // once the avatar root is placed out on the planet surface.
             avatarRoot = new GameObject("Avatar_" + spec.version);
-            avatarRoot.transform.SetParent(transform);
+            avatarRoot.transform.SetParent(transform, false);
             avatarRoot.transform.localPosition = Vector3.zero;
 
             Debug.Log($"Building avatar: skinTone={spec.skinTone}, hair={spec.hairStyle}/{spec.hairColor}, eyes={spec.eyeColor}");
 
             // Build body (cube, chibi proportions)
             GameObject body = CreateBody(spec);
-            body.transform.SetParent(avatarRoot.transform);
+            body.transform.SetParent(avatarRoot.transform, false);
 
             // Build head (larger sphere, chibi style)
             GameObject head = CreateHead(spec);
-            head.transform.SetParent(avatarRoot.transform);
+            head.transform.SetParent(avatarRoot.transform, false);
 
             // Build simple eyes
             GameObject leftEye = CreateEye(spec, isRight: false);
-            leftEye.transform.SetParent(head.transform);
+            leftEye.transform.SetParent(head.transform, false);
 
             GameObject rightEye = CreateEye(spec, isRight: true);
-            rightEye.transform.SetParent(head.transform);
+            rightEye.transform.SetParent(head.transform, false);
 
             // Build hair
             GameObject hair = CreateHair(spec);
-            hair.transform.SetParent(head.transform);
+            hair.transform.SetParent(head.transform, false);
+        }
+
+        // Avatars never need collision. Physics code is stripped from the WebGL
+        // build, so CreatePrimitive there logs a benign "collider class doesn't
+        // exist" line and adds no collider; on other platforms we drop it.
+        private static GameObject SolidPrimitive(PrimitiveType type)
+        {
+            GameObject go = GameObject.CreatePrimitive(type);
+            if (go.TryGetComponent(out Collider col))
+            {
+                Destroy(col);
+            }
+            return go;
         }
 
         private GameObject CreateBody(AvatarSpec spec)
@@ -64,14 +79,9 @@ namespace TrustCamp.Avatar
             GameObject body = new GameObject("Body");
 
             // Cube body with chibi proportions
-            GameObject bodyMesh = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Collider collider = bodyMesh.GetComponent<Collider>();
-            if (collider != null)
-            {
-                collider.enabled = false;
-            }
+            GameObject bodyMesh = SolidPrimitive(PrimitiveType.Cube);
             bodyMesh.name = "BodyMesh";
-            bodyMesh.transform.SetParent(body.transform);
+            bodyMesh.transform.SetParent(body.transform, false);
             bodyMesh.transform.localPosition = Vector3.zero;
             bodyMesh.transform.localScale = new Vector3(0.6f, 0.8f, 0.4f);
 
@@ -79,7 +89,9 @@ namespace TrustCamp.Avatar
             Renderer bodyRenderer = bodyMesh.GetComponent<Renderer>();
             if (bodyRenderer != null)
             {
-                Material mat = new Material(baseMaterial ?? Shader.Find("Standard"));
+                Material mat = baseMaterial != null
+                    ? new Material(baseMaterial)
+                    : new Material(Shader.Find("Unlit/Color"));
                 mat.color = GetSkinColor(spec.skinTone);
                 bodyRenderer.material = mat;
 
@@ -101,14 +113,9 @@ namespace TrustCamp.Avatar
             head.transform.localPosition = new Vector3(0, 0.6f, 0);
 
             // Sphere head (larger, chibi style)
-            GameObject headMesh = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            Collider headCollider = headMesh.GetComponent<Collider>();
-            if (headCollider != null)
-            {
-                headCollider.enabled = false;
-            }
+            GameObject headMesh = SolidPrimitive(PrimitiveType.Sphere);
             headMesh.name = "HeadMesh";
-            headMesh.transform.SetParent(head.transform);
+            headMesh.transform.SetParent(head.transform, false);
             headMesh.transform.localPosition = Vector3.zero;
             headMesh.transform.localScale = new Vector3(0.5f, 0.6f, 0.5f);
 
@@ -116,7 +123,9 @@ namespace TrustCamp.Avatar
             Renderer headRenderer = headMesh.GetComponent<Renderer>();
             if (headRenderer != null)
             {
-                Material mat = new Material(baseMaterial ?? Shader.Find("Standard"));
+                Material mat = baseMaterial != null
+                    ? new Material(baseMaterial)
+                    : new Material(Shader.Find("Unlit/Color"));
                 mat.color = GetSkinColor(spec.skinTone);
                 headRenderer.material = mat;
             }
@@ -131,14 +140,9 @@ namespace TrustCamp.Avatar
             eye.transform.localPosition = new Vector3(xOffset, 0.1f, 0.2f);
 
             // Small sphere for eye
-            GameObject eyeMesh = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            Collider eyeCollider = eyeMesh.GetComponent<Collider>();
-            if (eyeCollider != null)
-            {
-                eyeCollider.enabled = false;
-            }
+            GameObject eyeMesh = SolidPrimitive(PrimitiveType.Sphere);
             eyeMesh.name = "EyeMesh";
-            eyeMesh.transform.SetParent(eye.transform);
+            eyeMesh.transform.SetParent(eye.transform, false);
             eyeMesh.transform.localPosition = Vector3.zero;
             eyeMesh.transform.localScale = new Vector3(0.1f, 0.12f, 0.08f);
 
@@ -146,7 +150,9 @@ namespace TrustCamp.Avatar
             Renderer eyeRenderer = eyeMesh.GetComponent<Renderer>();
             if (eyeRenderer != null)
             {
-                Material mat = new Material(baseMaterial ?? Shader.Find("Standard"));
+                Material mat = baseMaterial != null
+                    ? new Material(baseMaterial)
+                    : new Material(Shader.Find("Unlit/Color"));
                 mat.color = GetEyeColor(spec.eyeColor);
                 eyeRenderer.material = mat;
 
@@ -168,14 +174,9 @@ namespace TrustCamp.Avatar
             hair.transform.localPosition = new Vector3(0, 0.3f, 0);
 
             // Simple hair crown (cylinder on top of head)
-            GameObject hairMesh = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            Collider hairCollider = hairMesh.GetComponent<Collider>();
-            if (hairCollider != null)
-            {
-                hairCollider.enabled = false;
-            }
+            GameObject hairMesh = SolidPrimitive(PrimitiveType.Cylinder);
             hairMesh.name = "HairMesh";
-            hairMesh.transform.SetParent(hair.transform);
+            hairMesh.transform.SetParent(hair.transform, false);
             hairMesh.transform.localPosition = new Vector3(0, 0.05f, 0);
             hairMesh.transform.localScale = new Vector3(0.35f, 0.15f, 0.35f);
 
@@ -183,7 +184,9 @@ namespace TrustCamp.Avatar
             Renderer hairRenderer = hairMesh.GetComponent<Renderer>();
             if (hairRenderer != null)
             {
-                Material mat = new Material(baseMaterial ?? Shader.Find("Standard"));
+                Material mat = baseMaterial != null
+                    ? new Material(baseMaterial)
+                    : new Material(Shader.Find("Unlit/Color"));
                 mat.color = GetHairColor(spec.hairColor);
                 hairRenderer.material = mat;
             }

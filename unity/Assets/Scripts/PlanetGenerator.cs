@@ -44,6 +44,16 @@ namespace TrustCamp.World
             PopulateMountains();
         }
 
+        /// <summary>Planet base radius (before terrain displacement).</summary>
+        public float Radius => radius;
+
+        /// <summary>Representative outward surface direction for a biome ("Forest"/"Lake"/"Camp"/"Mountains").</summary>
+        public Vector3 BiomeDirection(string biome) => BiomeCenter(biome);
+
+        /// <summary>Seat <paramref name="go"/> on the surface along <paramref name="dir"/>, standing up along the normal.</summary>
+        public void PlaceOnSurface(GameObject go, Vector3 dir, float extraHeight = 0.1f) =>
+            OrientToSurface(go, dir.normalized, radius + extraHeight);
+
         private void Awake()
         {
             // Only self-generate at runtime (builds). Edit-mode tests call Generate() explicitly.
@@ -295,7 +305,7 @@ namespace TrustCamp.World
             get
             {
                 if (_vcolorMat != null) return _vcolorMat;
-                var sh = Shader.Find("Unlit/VertexColor");
+                var sh = Shader.Find("TrustCamp/UnlitVertexColor");
                 if (sh == null) sh = Shader.Find("Unlit/Color"); // fallback (no vertex colors)
                 _vcolorMat = new Material(sh);
                 return _vcolorMat;

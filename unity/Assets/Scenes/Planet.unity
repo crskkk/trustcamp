@@ -7722,9 +7722,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b27ab52fd69f9ae48b3acf3171b823b8, type: 3}
   m_Name:
   m_EditorClassIdentifier: TrustCamp.Avatar::TrustCamp.Avatar.AvatarShowcaseIntegration
-  showcaseDistance: 10
   autoSpawnOnStart: 1
-  toggleKey: 72
+  toggleKey: 104
 --- !u!21 &762917928
 Material:
   serializedVersion: 8

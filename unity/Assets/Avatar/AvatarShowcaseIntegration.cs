@@ -1,22 +1,32 @@
 using UnityEngine;
+using TrustCamp.World;
 
 namespace TrustCamp.Avatar
 {
     /// <summary>
-    /// Automatically integrates the AvatarShowcase into the active scene.
-    /// Spawns a showcase panel with 4 avatar displays when the scene loads.
-    /// Can be toggled with UI button or keyboard shortcut.
+    /// Spawns the fixed-seed avatar showcase into the running scene. The avatars
+    /// stand on the planet surface near the Camp biome, oriented to the surface
+    /// normal (like the trees), so the auto-orbiting camera pans past them.
+    /// Toggle with <see cref="toggleKey"/> (H).
     /// </summary>
     public class AvatarShowcaseIntegration : MonoBehaviour
     {
-        [SerializeField]
-        private float showcaseDistance = 10f;
+        [Header("Placement (tunable in the Editor — no rebuild needed)")]
+        [SerializeField, Tooltip("Uniform scale applied to each avatar.")]
+        private float surfaceScale = 2f;
 
+        [SerializeField, Tooltip("Longitude step between adjacent avatars, in degrees.")]
+        private float arcDegrees = 14f;
+
+        [SerializeField, Tooltip("Height above the surface for the avatar pivot, so the body sits on the ground.")]
+        private float feetOffset = 0.8f;
+
+        [Header("Behaviour")]
         [SerializeField]
         private bool autoSpawnOnStart = true;
 
         [SerializeField]
-        private KeyCode toggleKey = KeyCode.H; // H for "show avatars"
+        private KeyCode toggleKey = KeyCode.H;
 
         private GameObject showcasePanel;
         private bool showcaseActive = false;
@@ -32,7 +42,6 @@ namespace TrustCamp.Avatar
 
         private void Update()
         {
-            // Toggle showcase with keyboard shortcut
             if (Input.GetKeyDown(toggleKey))
             {
                 if (showcaseActive)
@@ -53,19 +62,50 @@ namespace TrustCamp.Avatar
                 return; // Already spawned
             }
 
-            // Create showcase panel at fixed world location (visible in default view)
+            var planet = Object.FindFirstObjectByType<PlanetGenerator>();
+
             showcasePanel = new GameObject("AvatarShowcasePanel");
+            showcasePanel.transform.SetParent(planet != null ? planet.transform : null, false);
 
-            // Position at origin, slightly elevated (center of planet area)
-            showcasePanel.transform.position = new Vector3(0, 2, -15);
-            showcasePanel.transform.rotation = Quaternion.identity;
+            Vector3 campDir = planet != null
+                ? planet.BiomeDirection(PlanetGenerator.BiomeCamp)
+                : new Vector3(0f, 0f, 1f);
 
-            // Add showcase component
-            AvatarShowcase showcase = showcasePanel.AddComponent<AvatarShowcase>();
+            int[] seeds = AvatarShowcase.FixtureSeeds;
+            for (int i = 0; i < seeds.Length; i++)
+            {
+                // Fan the group out east–west along the surface, centred on the camp.
+                float lon = (i - (seeds.Length - 1) * 0.5f) * arcDegrees;
+                Vector3 dir = (Quaternion.AngleAxis(lon, Vector3.up) * campDir).normalized;
+
+                var go = new GameObject($"Avatar_Seed{seeds[i]}");
+                go.transform.SetParent(showcasePanel.transform, false);
+                go.transform.localScale = Vector3.one * surfaceScale;
+
+                go.AddComponent<AvatarProceduralBuilder>().BuildAvatar(AvatarShowcase.SpecForSeed(seeds[i]));
+
+                if (planet != null)
+                {
+                    planet.PlaceOnSurface(go, dir, feetOffset);
+                }
+                else
+                {
+                    go.transform.position = dir * (8f + feetOffset);
+                    go.transform.up = dir;
+                }
+
+                // Keep "up" along the surface normal, face tangent to the sphere.
+                Vector3 tangent = Vector3.Cross(dir, Vector3.up);
+                if (tangent.sqrMagnitude > 0.0001f)
+                {
+                    go.transform.rotation = Quaternion.LookRotation(tangent.normalized, dir);
+                }
+
+                Debug.Log($"Avatar {seeds[i]} spawned at {go.transform.position}");
+            }
 
             showcaseActive = true;
-
-            Debug.Log("Avatar Showcase spawned at: " + showcasePanel.transform.position);
+            Debug.Log($"Avatar Showcase spawned near camp ({seeds.Length} avatars)");
         }
 
         public void HideShowcase()

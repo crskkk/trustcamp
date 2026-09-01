@@ -1,7 +1,9 @@
 {
   "name": "TrustCamp.Avatar",
   "rootNamespace": "TrustCamp.Avatar",
-  "references": [],
+  "references": [
+    "TrustCamp.World"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
