@@ -51,30 +51,33 @@ namespace TrustCamp.Avatar
             // Replicate the TS seeded PRNG deterministic generation
             return new AvatarSpec
             {
-                skinTone = (int)(SimpleSeededRNG(seed, 0) % 5),
-                hairStyle = (int)(SimpleSeededRNG(seed, 1) % 5),
-                hairColor = (int)(SimpleSeededRNG(seed, 2) % 5),
-                eyeColor = (int)(SimpleSeededRNG(seed, 3) % 5),
-                expression = (int)(SimpleSeededRNG(seed, 4) % 4),
-                bodyAccent = (int)(SimpleSeededRNG(seed, 5) % 4),
+                skinTone = (int)(SimpleSeededRNG(seed, 0) * 5) % 5,
+                hairStyle = (int)(SimpleSeededRNG(seed, 1) * 5) % 5,
+                hairColor = (int)(SimpleSeededRNG(seed, 2) * 5) % 5,
+                eyeColor = (int)(SimpleSeededRNG(seed, 3) * 5) % 5,
+                expression = (int)(SimpleSeededRNG(seed, 4) * 4) % 4,
+                bodyAccent = (int)(SimpleSeededRNG(seed, 5) * 4) % 4,
                 version = 1,
             };
         }
 
-        private uint SimpleSeededRNG(int seed, int offset)
+        private float SimpleSeededRNG(int seed, int step)
         {
-            // LCG (Linear Congruential Generator) matching TS implementation
-            uint a = 1103515245;
-            uint c = 12345;
-            uint m = 2147483648; // 2^31
+            // LCG (Linear Congruential Generator) matching TS implementation exactly
+            const uint a = 1103515245;
+            const uint c = 12345;
+            const uint m = 2147483648; // 2^31
 
-            uint current = (uint)(seed + offset);
-            for (int i = 0; i <= offset; i++)
+            uint current = (uint)Mathf.Abs(seed) % m;
+
+            // Advance RNG state `step` times to get the nth random value
+            for (int i = 0; i <= step; i++)
             {
                 current = (a * current + c) % m;
             }
 
-            return current;
+            // Return normalized value [0, 1)
+            return current / (float)m;
         }
 
         private void AddLabel(GameObject avatarDisplay, string text)

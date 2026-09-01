@@ -63,7 +63,11 @@ namespace TrustCamp.Avatar
 
             // Cube body with chibi proportions
             GameObject bodyMesh = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            DestroyImmediate(bodyMesh.GetComponent<Collider>());
+            Collider collider = bodyMesh.GetComponent<Collider>();
+            if (collider != null)
+            {
+                collider.enabled = false;
+            }
             bodyMesh.name = "BodyMesh";
             bodyMesh.transform.SetParent(body.transform);
             bodyMesh.transform.localPosition = Vector3.zero;
@@ -76,12 +80,9 @@ namespace TrustCamp.Avatar
                 Material mat = new Material(baseMaterial ?? Shader.Find("Standard"));
                 mat.color = GetSkinColor(spec.skinTone);
                 bodyRenderer.material = mat;
-            }
 
-            // Add accent color overlay
-            Color accentColor = GetAccentColor(spec.bodyAccent);
-            if (bodyRenderer != null)
-            {
+                // Add accent color overlay
+                Color accentColor = GetAccentColor(spec.bodyAccent);
                 bodyRenderer.material.color = Color.Lerp(
                     bodyRenderer.material.color,
                     accentColor,
@@ -99,7 +100,11 @@ namespace TrustCamp.Avatar
 
             // Sphere head (larger, chibi style)
             GameObject headMesh = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            DestroyImmediate(headMesh.GetComponent<Collider>());
+            Collider headCollider = headMesh.GetComponent<Collider>();
+            if (headCollider != null)
+            {
+                headCollider.enabled = false;
+            }
             headMesh.name = "HeadMesh";
             headMesh.transform.SetParent(head.transform);
             headMesh.transform.localPosition = Vector3.zero;
@@ -125,7 +130,11 @@ namespace TrustCamp.Avatar
 
             // Small sphere for eye
             GameObject eyeMesh = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            DestroyImmediate(eyeMesh.GetComponent<Collider>());
+            Collider eyeCollider = eyeMesh.GetComponent<Collider>();
+            if (eyeCollider != null)
+            {
+                eyeCollider.enabled = false;
+            }
             eyeMesh.name = "EyeMesh";
             eyeMesh.transform.SetParent(eye.transform);
             eyeMesh.transform.localPosition = Vector3.zero;
@@ -138,11 +147,8 @@ namespace TrustCamp.Avatar
                 Material mat = new Material(baseMaterial ?? Shader.Find("Standard"));
                 mat.color = GetEyeColor(spec.eyeColor);
                 eyeRenderer.material = mat;
-            }
 
-            // Expression affects eye appearance (tint or pupil size simulation)
-            if (eyeRenderer != null)
-            {
+                // Expression affects eye appearance (tint or pupil size simulation)
                 Color emotionTint = GetExpressionTint(spec.expression);
                 eyeRenderer.material.color = Color.Lerp(
                     eyeRenderer.material.color,
@@ -161,7 +167,11 @@ namespace TrustCamp.Avatar
 
             // Simple hair crown (cylinder on top of head)
             GameObject hairMesh = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            DestroyImmediate(hairMesh.GetComponent<Collider>());
+            Collider hairCollider = hairMesh.GetComponent<Collider>();
+            if (hairCollider != null)
+            {
+                hairCollider.enabled = false;
+            }
             hairMesh.name = "HairMesh";
             hairMesh.transform.SetParent(hair.transform);
             hairMesh.transform.localPosition = new Vector3(0, 0.05f, 0);
