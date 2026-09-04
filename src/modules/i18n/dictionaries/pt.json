@@ -34,5 +34,9 @@
   "hud.lang.es": "Español",
   "hud.lang.pt": "Português",
   "hud.lang.label": "Idioma",
-  "lti.launch_ok": "Lançamento OK"
+  "lti.launch_ok": "Lançamento OK",
+  "presence.title": "Outros jogadores",
+  "presence.role.scout": "Explorador",
+  "presence.role.camp": "Acampante",
+  "presence.role.hacker": "Hacker"
 }

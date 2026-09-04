@@ -1,0 +1,48 @@
+/* src/modules/presence/presence.css — dev-only HUD strip styling. */
+.tc-presence {
+  position: fixed;
+  top: 56px;
+  right: 12px;
+  z-index: 60;
+  background: rgba(20, 26, 38, 0.78);
+  color: #e6eefb;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: 12px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  max-width: 220px;
+  backdrop-filter: blur(4px);
+  pointer-events: none; /* dev-only passive overlay */
+}
+.tc-presence-title {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 10px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+.tc-presence-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tc-presence-chip {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.tc-presence-chip-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  opacity: 0.8;
+}
+.tc-presence-chip-role {
+  font-weight: 500;
+}

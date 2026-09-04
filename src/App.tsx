@@ -5,6 +5,7 @@ import { StatusPanel } from "./modules/statuspanel/StatusPanel";
 import { WorldEmbed } from "./modules/world/api";
 import { Hud } from "./modules/hud/api";
 import { startOrbit, stopOrbit } from "./modules/screensaver/api";
+import { PresenceOverlay } from "./modules/presence/api";
 
 export function App() {
   if (typeof window !== "undefined" && window.location.pathname === "/screensaver") {
@@ -16,7 +17,12 @@ export function App() {
         <AppSubtitle />
         <WorldEmbed />
       </Hud>
-      {import.meta.env.DEV && <StatusPanel />}
+      {import.meta.env.DEV && (
+        <>
+          <StatusPanel />
+          <PresenceOverlay selfId="self" />
+        </>
+      )}
     </div>
   );
 }

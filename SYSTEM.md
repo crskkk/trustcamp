@@ -35,6 +35,12 @@
 - **depends_on:** —
 - **description:** LTI 1.3 Phase C scaffold: OIDC login handler, JWT validation, and session token emit with privacy-first design. Only the opaque 'sub' claim is used; no PII (name, email, etc.) is ever requested or stored.
 
+### presence `0.2.0`
+
+- **api:** `src/modules/presence/api.ts`
+- **depends_on:** bridge, i18n
+- **description:** Realtime presence view: subscribes to the bridge, normalizes per-player state, prunes stale entries, and exposes a small hook + event bus. Powers the dev-only PresenceOverlay HUD strip and is the foundation for the multiplayer avatar rendering in task 0103. No PII; the only identifier is the bridge's opaque sessionId. Dev-only window.__tcPresenceTest seam is tree-shaken in production builds.
+
 ### scorebus `0.1.0`
 
 - **api:** `src/modules/scorebus/api.ts`

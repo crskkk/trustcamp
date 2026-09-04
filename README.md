@@ -27,4 +27,4 @@ The dev-only **System Status panel** (bottom-right) shows live worker status lig
 
 ## Status
 
-- **Current version: v0.1** — worker spine + repo bootstrap + dev-only System Status panel.
+- **Current version: v1.2** — realtime presence wireup (presence module + dev HUD strip + two-tab e2e).
