@@ -56,10 +56,17 @@ it fails.
    transport and exercises the < 150 ms feel budget end-to-end on one
    machine.
 
-**T-5 Human-or-AI spot-check (NPC indistinguishability)**
-1. Join a world with ≥ 3 NPCs and ≥ 1 other human.
-2. Play 20 guesses (via a two-player helper sheet or the spawn-menu helper).
-3. Expected: testers land 40%–60% correct. Outside that band → something leaks.
+**T-5 Dev seed of NPCs (task 0103)**
+1. With the dev server running, open the page at `http://127.0.0.1:5173/`.
+2. The "NPCs" dev control in the bottom-left shows `3`. The PresenceOverlay
+   chip strip in the top-right shows three `npc-101` / `npc-202` / `npc-303`
+   chips, each labeled "Prospect".
+3. The NPC chip avatar IDs match the seeds the Bootstrap uses; if you change
+   seeds in `src/App.tsx` and reload, the new ids appear.
+4. Click "Clear NPCs" — the count drops to 0 and the chips vanish within ~1 s.
+5. The real indistinguishability validation (NPCs rendered in Unity with the
+   same locomotion path as players, motion budget ≤ 4 m/s, etc.) lands in
+   task 0104. Until then, this script is the local truth.
 
 ---
 

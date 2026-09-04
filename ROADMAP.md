@@ -1,6 +1,6 @@
 # ROADMAP.md — Versioned Priorities & Integration Strategy
 
-**Current version: v1.2** (StatusPanel reads this line to render the version chip.)
+**Current version: v1.3** (StatusPanel reads this line to render the version chip.)
 
 Versions use **dot-versioning** `vX.Y`: X = milestone (phase of the world), Y = task
 merged within that phase. Every merged task bumps Y. Milestone gates (M1–M4 below)
@@ -8,6 +8,7 @@ must ALL pass before X increments. Current version moves forward one merge at a 
 see git history for the up-to-date value.
 
 ## Merged
+- `v1.3` — 0103 NPC spawner (new `npc` module: spawnNpc/clearNpcs/listNpcs/setNpcCap, avatar.generate() reuse per AGENTS §9, `presence.removePeer` + `PresenceMap.remove` for despawn, dev seed of 3 Prospects in the Bootstrap, i18n keys `npc.role.prospect` + `npc.dev.*`). Core NPC camo/locomotion land in 0104.
 - `v1.2` — 0102 Realtime presence wireup (new `presence` module: PresenceMap merge/prune/clear/interpolate, bridge consumer, dev-only PresenceOverlay HUD strip, BroadcastChannel test seam, Playwright two-tab e2e, i18n keys for `presence.title` + `presence.role.{scout,camp,hacker}`). **T-4 step 1 falsifiable end-to-end locally; real Supabase/LTI cross-network test deferred to v3.**
 - `v1.1` — 0101 Camera & player controller (sphere-walk `PlayerController.Step()`, chase `PlayerCamera`, opt-in `PlayerSpawner`; MotionSmoke edit tests). **Core (v1) begins — M1 gate passed.**
 - `v0.10` — 0010 Scorebus skeleton (round-envelope schema + validator + in-memory ingest sink; TS↔Unity mirror). Foundation complete.

@@ -42,5 +42,8 @@
   "presence.title": "Other players",
   "presence.role.scout": "Scout",
   "presence.role.camp": "Camper",
-  "presence.role.hacker": "Hacker"
+  "presence.role.hacker": "Hacker",
+  "npc.role.prospect": "Prospect",
+  "npc.dev.label": "NPCs",
+  "npc.dev.clear": "Clear NPCs"
 }

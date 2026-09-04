@@ -248,6 +248,16 @@ export function subscribePresence(cb: PresenceListener): () => void {
   };
 }
 
+/**
+ * Remove a peer from the shared map and emit a "leave" event. Used by the
+ * npc spawner to despawn. Idempotent: removing a non-existent peer is a no-op.
+ */
+export function removePeer(playerId: string): void {
+  const map = ensureMap();
+  const removed = map.remove(playerId);
+  if (removed) emit({ kind: "leave", playerId });
+}
+
 export function clearPresence(): void {
   if (bridgeUnsub) {
     bridgeUnsub();

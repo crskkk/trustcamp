@@ -112,6 +112,13 @@ export class PresenceMap {
     return this.entries.has(playerId);
   }
 
+  /** Remove a single entry by playerId; fires shape change if it was present. */
+  remove(playerId: string): boolean {
+    const had = this.entries.delete(playerId);
+    if (had) this.emitShape();
+    return had;
+  }
+
   size(): number {
     return this.entries.size;
   }

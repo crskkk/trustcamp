@@ -42,5 +42,8 @@
   "presence.title": "Otros jugadores",
   "presence.role.scout": "Explorador",
   "presence.role.camp": "Campista",
-  "presence.role.hacker": "Hacker"
+  "presence.role.hacker": "Hacker",
+  "npc.role.prospect": "Prospecto",
+  "npc.dev.label": "NPCs",
+  "npc.dev.clear": "Limpiar NPCs"
 }

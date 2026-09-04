@@ -35,3 +35,5 @@
 | 0101 | v1.1 | camera + player controller | `625fc79` | 360 | 220 | 6 | 13 000 | 4 200 | 17 786 |
 | 0102 | v1.2 | realtime presence wireup | `deaf6e3` | 760 | 480 | 14 | 28 000 | 9 000 | 38 264 |
 | 0102-fix | v1.2 | heartbeat + bridge pipe (no-devtools fix) | `6dd5af8` | 320 | 240 | 9 | 16 000 | 5 500 | 22 072 |
+| scaffold | v1.2 | TASK_LOG.md + StatusPanel task-cost table | `a2ba7c1` | 240 | 100 | 6 | 11 000 | 3 800 | 15 146 |
+| 0103 | v1.3 | NPC spawner (avatar reuse, presence integration) | (TBD) | 380 | 1 | 15 | 18 000 | 6 000 | 30 378 |

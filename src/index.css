@@ -106,6 +106,34 @@ body {
 .tc-sp-tasklog-task { display: flex; gap: 0.35rem; align-items: baseline; }
 .tc-sp-tasklog-id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .tc-sp-tasklog-ver { color: #6f80b3; font-size: 0.68rem; }
+
+/* NPC dev controls (task 0103) */
+.tc-npc-dev {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 49;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--tc-panel);
+  border: 1px solid #2a3358;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.78rem;
+  color: #cdd6f4;
+}
+.tc-npc-dev-count { font-variant-numeric: tabular-nums; color: #9fb0e0; }
+.tc-npc-dev-clear {
+  background: transparent;
+  border: 1px solid #2a3358;
+  color: #cdd6f4;
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.45rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+.tc-npc-dev-clear:hover { background: #1a2240; }
 .tc-sp-dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #555; display: inline-block; }
 .tc-sp-dot.ok { background: var(--tc-ok); }
 .tc-sp-dot.bad { background: var(--tc-bad); }

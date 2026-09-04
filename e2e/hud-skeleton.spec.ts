@@ -11,16 +11,19 @@ test.describe("HUD skeleton", () => {
     // The HUD toggle button is always visible.
     await expect(page.getByRole("button", { name: /collapse/i })).toBeVisible();
 
-    // Default expanded view shows every row.
+    const hudRoot = page.getByTestId("hud-root");
+
+    // Default expanded view shows every row (scoped to the HUD chrome so
+    // the dev NPC presence strip's "Prospect" labels don't satisfy the
+    // "role" match).
     for (const key of ["score", "role", "level", "items", "notifications", "avatar", "leaderboard"]) {
-      await expect(page.getByText(new RegExp(key, "i"))).toBeVisible();
+      await expect(hudRoot.getByText(new RegExp(key, "i"))).toBeVisible();
     }
 
     // Collapse → only the toggle button is visible inside the HUD chrome.
     // (The dev-only System Status panel may render its own buttons outside
     // the HUD; we scope the count to the HUD root.)
     await page.getByRole("button", { name: /collapse/i }).click();
-    const hudRoot = page.getByTestId("hud-root");
     const visibleHudButtons = hudRoot.getByRole("button");
     await expect(visibleHudButtons).toHaveCount(1);
     await expect(hudRoot.getByRole("button", { name: /expand/i })).toBeVisible();
