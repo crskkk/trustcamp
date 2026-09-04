@@ -56,31 +56,29 @@ it fails.
    transport and exercises the < 150 ms feel budget end-to-end on one
    machine.
 
-**T-5 NPCs indistinguishable from humans (tasks 0103 + 0104)**
-1. With the dev server running and `unity/Assets/Scripts/NpcSpawner.cs`
-   compiled into a local Unity build (run `pnpm dev:unity` once)
-   open `http://127.0.0.1:5173/?npcs`. (Without the ?npcs URL param the
-   shell still seeds 3 Prospects; they show as chips. Unity bodies land
-   when the build is loaded with the param.)
-2. The PresenceOverlay chip strip shows 3 Prospects (`npc-101`,
-   `npc-202`, `npc-303`) plus the local player's session id.
-3. Open a second browser tab. It joins the world and shows the same 3
-   NPC chips in its own strip, plus the other tab's session id.
-4. **Motion check.** Watch an NPC chip's `data-x` attribute (DOM inspector
-   or `e2e/npc-motion.spec.ts`) for ~3 s; it must change at least once as
-   the publish loop ticks. Also, in the Unity scene, the NPC capsules
-   walk the planet along the same great circle a human player would,
-   because they use the same `PlayerController.Step()` path
-   (`unity/Assets/Tests/EditMode/NpcLocomotionEditTests.cs` enforces
-   the parity at edit time).
-5. **Indistinguishability test.** Over 20 guesses, testers should
-   land 40%–60% correct (STANDARDS §5.2). A perfect or zero score
-   means something leaks — most commonly an `isNpc` visual branch,
-   a faster speed cap, or a different motion pattern. The fix path
-   is to look at the avatar builder + the motion policy + the cap.
-6. Bash visual: `npm run dev:unity` once before this script so the
-   Unity bodies are alive; the chip-strip behavior is dev-only and
-   skips in CI.
+**T-5 NPCs indistinguishable from humans (tasks 0103 + 0104 + 0105)**
+1. With the dev server running, open `http://127.0.0.1:5173/`. The
+   PresenceOverlay chip strip shows 3 Prospects (`npc-101`, `npc-202`,
+   `npc-303`) **in the dev chip list only** — 0103/0104 do not yet
+   render 3D bodies. The chip-list presence is the current truth,
+   not visual avatars.
+2. Open a second browser tab on the same origin; it shows the same NPC
+   chips (the localStorage heartbeat from 0102 carries them across).
+3. **Motion check.** Watch an NPC chip's `data-x` attribute (DOM
+   inspector or `e2e/npc-motion.spec.ts`) for ~3 s; it must change at
+   least once as the TS publish loop ticks.
+4. **3D body render** (lands with 0105): when the build at
+   `public/unity/Build/` is rebuilt with `NpcController.cs`,
+   `NpcSpawner.cs`, and the new shell→Unity bridge listener, and a
+   StaticConfig writer pushes the 3 seeds from the shell to the Unity
+   client, the planet shows 3 capsule-NPCs walking along the same
+   great-circles a human does (the `unity/.../NpcLocomotionEditTests.cs`
+   asserts locomotion parity at edit time).
+5. **Indistinguishability test.** Over 20 guesses, testers should land
+   40%–60% correct (STANDARDS §5.2). Falls outside that band → something
+   leaks; pointer is the avatar builder, the motion policy, the cap.
+6. **Today (pre-0105)**: skip the body render and cap steps; the chip
+   strip is the only falsifiable behavior.
 
 ---
 

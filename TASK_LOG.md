@@ -19,6 +19,14 @@
 >
 > The StatusPanel renders the last 5 rows so the cost-per-feature trend is
 > visible in dev.
+>
+> **Honesty notes:**
+> - **0104** shipped the *TS* motion policy + per-tick `bridge.sendState`
+>   publishing only. The Unity bodies were not wired in this round (no
+>   shell→Unity glue, no `StaticConfig` writer, and the build at
+>   `public/unity/Build/` predates `NpcController.cs` / `NpcSpawner.cs`).
+>   Manifest: NPCs show up in the dev chip strip (presence list) but not
+>   in the 3D world. The cross-process glue lands in task 0105.
 
 | task | version | title | commit | code_in | code_out | tools | conv_in | conv_out | total |
 |------|---------|-------|--------|---------|----------|-------|---------|----------|-------|
@@ -37,4 +45,4 @@
 | 0102-fix | v1.2 | heartbeat + bridge pipe (no-devtools fix) | `6dd5af8` | 320 | 240 | 9 | 16 000 | 5 500 | 22 072 |
 | scaffold | v1.2 | TASK_LOG.md + StatusPanel task-cost table | `a2ba7c1` | 240 | 100 | 6 | 11 000 | 3 800 | 15 146 |
 | 0103 | v1.3 | NPC spawner (avatar reuse, presence integration) | `1418ec9` | 380 | 1 | 15 | 18 000 | 6 000 | 30 378 |
-| 0104 | v1.4 | NPC camo + locomotion (motion policy + Unity wrapper) | `3eef3af` | 892 | 34 | 26 | 48 000 | 16 000 | 73 957 |
+| 0104 | v1.4 | NPC camo + locomotion (TS motion policy + bridge tick) | `3eef3af` | 892 | 34 | 26 | 48 000 | 16 000 | 73 957 |
