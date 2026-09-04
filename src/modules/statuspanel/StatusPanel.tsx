@@ -5,6 +5,7 @@ import {
   readTestResults,
   readVersion,
   readSystemMd,
+  readTaskLog,
   type PanelState,
 } from "./panelRuntime";
 
@@ -17,6 +18,11 @@ const WORKER_KEYS = [
 
 type WorkerKey = (typeof WORKER_KEYS)[number];
 
+function fmt(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
+
 export function StatusPanel() {
   const [state, setState] = useState<PanelState | null>(null);
   const [dismissed, setDismissed] = useState(false);
@@ -26,7 +32,8 @@ export function StatusPanel() {
     const tests = await readTestResults();
     const version = await readVersion();
     const systemMd = await readSystemMd();
-    setState({ results, tests, version, systemMd });
+    const taskLog = await readTaskLog();
+    setState({ results, tests, version, systemMd, taskLog });
   }
 
   useEffect(() => {
@@ -89,6 +96,33 @@ export function StatusPanel() {
         <span className="tc-sp-label">{t("status.version")}</span>
         <span className="tc-sp-chip" data-testid="version-chip">{state?.version ?? t("status.notrun")}</span>
       </div>
+
+      {state?.taskLog && state.taskLog.length > 0 && (
+        <div className="tc-sp-section" data-testid="task-log">
+          <div className="tc-sp-label">{t("status.tasklog")}</div>
+          <table className="tc-sp-tasklog">
+            <thead>
+              <tr>
+                <th>{t("status.tasklog.task")}</th>
+                <th>{t("status.tasklog.total")}</th>
+                <th>{t("status.tasklog.tools")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...state.taskLog].slice(-5).reverse().map((row) => (
+                <tr key={`${row.task}-${row.commit}`} data-task={row.task}>
+                  <td className="tc-sp-tasklog-task" title={`${row.title} @ ${row.commit}`}>
+                    <span className="tc-sp-tasklog-id">{row.task}</span>
+                    <span className="tc-sp-tasklog-ver">{row.version}</span>
+                  </td>
+                  <td className="tc-sp-tasklog-num">{fmt(row.total)}</td>
+                  <td className="tc-sp-tasklog-num">{row.tools}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <details className="tc-sp-system" open>
         <summary>{t("status.system")}</summary>

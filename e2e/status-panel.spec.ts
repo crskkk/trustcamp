@@ -11,7 +11,14 @@ test("status panel shows workers, tests, SYSTEM.md preview, and version chip", a
   await expect(page.getByText("bundle:guard")).toBeVisible();
   // Test pass line (format "N / M") and version chip both present.
   await expect(page.getByText(/\d+ \/ \d+/)).toBeVisible();
-  await expect(page.getByText(/^v\d+\.\d+$/)).toBeVisible();
+  await expect(page.getByTestId("version-chip")).toBeVisible();
   // SYSTEM.md preview visible somewhere.
   await expect(page.getByText("## Modules")).toBeVisible();
+  // Task log section also present (v1.2 follow-up: token-cost ledger).
+  await expect(page.getByTestId("task-log")).toBeVisible();
+  await expect(
+    page
+      .getByTestId("task-log")
+      .locator('[data-task="0102"]'),
+  ).toBeVisible();
 });

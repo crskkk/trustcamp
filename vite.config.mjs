@@ -9,7 +9,8 @@ import { readFileSync, existsSync } from "node:fs";
 /// <reference types="vitest" />
 
 // Dev-only middleware: serve repo-root artifacts the StatusPanel fetches at runtime
-// (test-results.json, SYSTEM.md, ROADMAP.md). These are generated files, not in /public.
+// (test-results.json, SYSTEM.md, ROADMAP.md, TASK_LOG.md). These are generated
+// files, not in /public.
 function serveRootArtifacts() {
   return {
     name: "serve-root-artifacts",
@@ -28,6 +29,7 @@ function serveRootArtifacts() {
         if (req.url === "/test-results.json") return serve("test-results.json", "application/json");
         if (req.url === "/SYSTEM.md") return serve("SYSTEM.md", "text/markdown");
         if (req.url === "/ROADMAP.md") return serve("ROADMAP.md", "text/markdown");
+        if (req.url === "/TASK_LOG.md") return serve("TASK_LOG.md", "text/markdown");
         next();
       });
     },

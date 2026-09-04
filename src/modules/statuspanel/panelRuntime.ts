@@ -20,6 +20,20 @@ export interface PanelState {
   tests: { passed: number; total: number } | null;
   version: string | null;
   systemMd: string | null;
+  taskLog: TaskLogRow[];
+}
+
+export interface TaskLogRow {
+  task: string;
+  version: string;
+  title: string;
+  commit: string;
+  codeIn: number;
+  codeOut: number;
+  tools: number;
+  convIn: number;
+  convOut: number;
+  total: number;
 }
 
 // import.meta.glob: Vite collects these at build time. eager:false → async import.
@@ -152,5 +166,53 @@ export async function readSystemMd(): Promise<string | null> {
     return await res.text();
   } catch {
     return null;
+  }
+}
+
+function parseNumber(s: string | undefined): number {
+  if (!s) return 0;
+  const cleaned = s.replace(/[^\d.-]/g, "");
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
+
+/**
+ * Parse TASK_LOG.md (a markdown table) and return its rows in declaration order.
+ * Robust to extra whitespace and a leading header/footer block — only the
+ * pipe-delimited table rows are read.
+ */
+export function parseTaskLog(md: string): TaskLogRow[] {
+  const rows: TaskLogRow[] = [];
+  const lines = md.split(/\r?\n/);
+  for (const line of lines) {
+    if (!line.trim().startsWith("|")) continue;
+    if (line.includes("---")) continue; // separator
+    if (line.toLowerCase().includes("| task |")) continue; // header
+    const cells = line.split("|").map((c) => c.trim()).filter((c) => c.length > 0);
+    if (cells.length < 10) continue;
+    rows.push({
+      task: cells[0],
+      version: cells[1],
+      title: cells[2],
+      commit: cells[3].replace(/`/g, ""),
+      codeIn: parseNumber(cells[4]),
+      codeOut: parseNumber(cells[5]),
+      tools: parseNumber(cells[6]),
+      convIn: parseNumber(cells[7]),
+      convOut: parseNumber(cells[8]),
+      total: parseNumber(cells[9]),
+    });
+  }
+  return rows;
+}
+
+export async function readTaskLog(): Promise<TaskLogRow[]> {
+  try {
+    const res = await fetch("/TASK_LOG.md");
+    if (!res.ok) return [];
+    const text = await res.text();
+    return parseTaskLog(text);
+  } catch {
+    return [];
   }
 }
