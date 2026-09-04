@@ -43,8 +43,8 @@ Rules:
 - `0101` Camera & player controller — FULL prompt: [`.claude/tasks/0101-camera-player-controller.md`](.claude/tasks/0101-camera-player-controller.md). **Merged v1.1.**
 - `0102` Realtime presence wireup — FULL prompt: [`.claude/tasks/0102-realtime-presence.md`](.claude/tasks/0102-realtime-presence.md).
 - `0103` NPC spawner — FULL prompt: [`.claude/tasks/0103-npc-spawner.md`](.claude/tasks/0103-npc-spawner.md).
-- `0104` Roles/Skills registry (RoleDef: display name, max slots, phase tag).
-- `0105` Scout funnel logic (Prospect → camp on attract touch or 1-1 game win).
+- `0104` NPC camo + locomotion — FULL prompt: [`.claude/tasks/0104-npc-camo-locomotion.md`](.claude/tasks/0104-npc-camo-locomotion.md).
+- `0105` Roles/Skills registry (RoleDef: display name, max slots, phase tag).
 - `0106` Emitter: world events → `scorebus` in-scope skeleton (realtime-safe
   queueing).
 

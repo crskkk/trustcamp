@@ -56,17 +56,31 @@ it fails.
    transport and exercises the < 150 ms feel budget end-to-end on one
    machine.
 
-**T-5 Dev seed of NPCs (task 0103)**
-1. With the dev server running, open the page at `http://127.0.0.1:5173/`.
-2. The "NPCs" dev control in the bottom-left shows `3`. The PresenceOverlay
-   chip strip in the top-right shows three `npc-101` / `npc-202` / `npc-303`
-   chips, each labeled "Prospect".
-3. The NPC chip avatar IDs match the seeds the Bootstrap uses; if you change
-   seeds in `src/App.tsx` and reload, the new ids appear.
-4. Click "Clear NPCs" — the count drops to 0 and the chips vanish within ~1 s.
-5. The real indistinguishability validation (NPCs rendered in Unity with the
-   same locomotion path as players, motion budget ≤ 4 m/s, etc.) lands in
-   task 0104. Until then, this script is the local truth.
+**T-5 NPCs indistinguishable from humans (tasks 0103 + 0104)**
+1. With the dev server running and `unity/Assets/Scripts/NpcSpawner.cs`
+   compiled into a local Unity build (run `pnpm dev:unity` once)
+   open `http://127.0.0.1:5173/?npcs`. (Without the ?npcs URL param the
+   shell still seeds 3 Prospects; they show as chips. Unity bodies land
+   when the build is loaded with the param.)
+2. The PresenceOverlay chip strip shows 3 Prospects (`npc-101`,
+   `npc-202`, `npc-303`) plus the local player's session id.
+3. Open a second browser tab. It joins the world and shows the same 3
+   NPC chips in its own strip, plus the other tab's session id.
+4. **Motion check.** Watch an NPC chip's `data-x` attribute (DOM inspector
+   or `e2e/npc-motion.spec.ts`) for ~3 s; it must change at least once as
+   the publish loop ticks. Also, in the Unity scene, the NPC capsules
+   walk the planet along the same great circle a human player would,
+   because they use the same `PlayerController.Step()` path
+   (`unity/Assets/Tests/EditMode/NpcLocomotionEditTests.cs` enforces
+   the parity at edit time).
+5. **Indistinguishability test.** Over 20 guesses, testers should
+   land 40%–60% correct (STANDARDS §5.2). A perfect or zero score
+   means something leaks — most commonly an `isNpc` visual branch,
+   a faster speed cap, or a different motion pattern. The fix path
+   is to look at the avatar builder + the motion policy + the cap.
+6. Bash visual: `npm run dev:unity` once before this script so the
+   Unity bodies are alive; the chip-strip behavior is dev-only and
+   skips in CI.
 
 ---
 

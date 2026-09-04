@@ -107,3 +107,29 @@ export function clearNpcs(): void {
   for (const n of npcs) removePeer(n.id);
   npcs.length = 0;
 }
+
+/**
+ * Remove a single NPC by id. Used by the motion loop when an entry is
+ * gone (e.g., after `clearNpcs()`). Returns true if the id was present.
+ */
+export function removeNpcById(id: string): boolean {
+  const idx = npcs.findIndex((n) => n.id === id);
+  if (idx < 0) return false;
+  const [n] = npcs.splice(idx, 1);
+  removePeer(n.id);
+  return true;
+}
+
+/**
+ * Update the cached position of an NPC. The motion loop calls this each
+ * tick after the synthetic step so the next `listNpcs()` reflects the
+ * latest world state. The position is not published through the presence
+ * heartbeat here — `bridge.ts` does that on its own tick to keep the
+ * surfaces decoupled.
+ */
+export function updateNpcPosition(id: string, position: { x: number; y: number; z: number }): boolean {
+  const n = npcs.find((e) => e.id === id);
+  if (!n) return false;
+  n.position = position;
+  return true;
+}

@@ -64,6 +64,9 @@ export function PresenceOverlay({ selfId = "self" }: PresenceOverlayProps): JSX.
               className="tc-presence-chip"
               data-testid="presence-chip"
               data-player={state.playerId}
+              data-x={state.x.toFixed(2)}
+              data-y={state.y.toFixed(2)}
+              data-z={state.z.toFixed(2)}
             >
               <span className="tc-presence-chip-id">{state.playerId}</span>
               <span className="tc-presence-chip-role">

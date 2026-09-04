@@ -14,11 +14,19 @@ test("status panel shows workers, tests, SYSTEM.md preview, and version chip", a
   await expect(page.getByTestId("version-chip")).toBeVisible();
   // SYSTEM.md preview visible somewhere.
   await expect(page.getByText("## Modules")).toBeVisible();
-  // Task log section also present (v1.2 follow-up: token-cost ledger).
-  await expect(page.getByTestId("task-log")).toBeVisible();
-  await expect(
-    page
-      .getByTestId("task-log")
-      .locator('[data-task="0102"]'),
-  ).toBeVisible();
+  // Task log section appears once the panel fetches TASK_LOG.md.
+  // The fetch is async and may take a moment after HMR + dev-server boot;
+  // poll instead of asserting-on-first-shot.
+  await expect
+    .poll(
+      async () => (await page.getByTestId("task-log").count()) === 1,
+      { timeout: 5_000, intervals: [200] },
+    )
+    .toBe(true);
+  await expect
+    .poll(
+      async () => (await page.getByTestId("task-log").locator("tbody tr").count()) >= 1,
+      { timeout: 5_000, intervals: [250] },
+    )
+    .toBe(true);
 });

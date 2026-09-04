@@ -35,11 +35,11 @@
 - **depends_on:** —
 - **description:** LTI 1.3 Phase C scaffold: OIDC login handler, JWT validation, and session token emit with privacy-first design. Only the opaque 'sub' claim is used; no PII (name, email, etc.) is ever requested or stored.
 
-### npc `0.2.0`
+### npc `0.3.0`
 
 - **api:** `src/modules/npc/api.ts`
 - **depends_on:** avatar, presence, i18n
-- **description:** NPC spawner. Uses the avatar generator (AGENTS §9 — same pipeline as players, no isNpc visual branch) and adds NPCs to the presence layer with a dedicated "npc-<seed>" playerId namespace. Default role is "prospect"; camo + locomotion land in task 0104. Cap defaults to 8 to prevent runaway spawns.
+- **description:** NPC spawner + motion policy + bridge publish loop. Uses the avatar generator (AGENTS §9 — same pipeline as players, no isNpc visual branch) and adds NPCs to the presence layer with a dedicated "npc-<seed>" playerId namespace. Default role is "prospect". Cap defaults to 8 to prevent runaway spawns. Task 0104 adds the pure motion policy (chooseInput) and the per-tick bridge.publish loop; the Unity NpcController (which wraps the player locomotion path) drives the bodies in the world.
 
 ### presence `0.3.0`
 

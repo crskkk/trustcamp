@@ -8,6 +8,8 @@ import { startOrbit, stopOrbit } from "./modules/screensaver/api";
 import { PresenceOverlay } from "./modules/presence/api";
 import { joinWorld as bridgeJoinWorld, sendState as bridgeSendState } from "./modules/bridge/api";
 import { spawnNpc, clearNpcs, listNpcs, setNpcCap } from "./modules/npc/api";
+import { startNpcMotion, stopNpcMotion } from "./modules/npc/bridge";
+import * as bridgeApi from "./modules/bridge/api";
 
 export function App() {
   if (typeof window !== "undefined" && window.location.pathname === "/screensaver") {
@@ -73,10 +75,16 @@ function Bootstrap(): null {
       for (const seed of [101, 202, 303]) {
         spawnNpc({ seed, role: "prospect" });
       }
+      // Start the per-tick publish loop (task 0104). The shell drives a
+      // synthetic shell-side step so the chip strip and (eventually) the
+      // Unity NpcController see motion. Real per-frame locomotion is in
+      // Unity (PlayerController.Step) — the shell just publishes state.
+      startNpcMotion({ bridge: bridgeApi, tickMs: 2000 });
     })();
     return () => {
       stopped = true;
       if (timer) clearInterval(timer);
+      stopNpcMotion();
     };
   }, []);
   return null;
