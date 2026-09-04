@@ -39,25 +39,22 @@ it fails.
 
 **T-4 Two players see each other**
 1. With the dev server running, open two browser tabs (or two windows) and
-   navigate to `http://127.0.0.1:5173/` on both.
-2. In the browser devtools console of tab A, drive a remote state:
-   ```js
-   window.__tcPresenceTest.pushRemote({ playerId: "remote-p1", x: 1, y: 2, z: 3, role: "scout" });
-   ```
-   (The seam is dev-only and tree-shaken in production builds.)
-3. Expected: tab B's "Other players" dev HUD strip shows a "remote-p1 · Scout"
-   chip within ~500 ms.
-4. Move in A: `__tcPresenceTest.pushRemote({ playerId: "remote-p1", x: 7, y: 8, z: 9, role: "scout" })`.
-   The chip stays (no flicker).
-5. Drop a second player: `__tcPresenceTest.pushRemote({ playerId: "remote-p2", ..., role: "camp" })`.
-   B shows two chips.
-6. Clear: `__tcPresenceTest.clear()`. Both chips vanish within ~500 ms.
-7. The same test runs as a Playwright spec at `e2e/presence-two-tab.spec.ts`
-   and is gated to skip in CI (the seam is dev-only). It uses a single
-   BrowserContext with two pages so the BroadcastChannel can fan out.
-8. Real cross-network T-4 (Supabase channel + LTI session tokens) is deferred
-   to v3 (task 0304/0307); for now the seam above stands in for the
-   transport and the < 150 ms feel budget is exercised end-to-end.
+   navigate to `http://127.0.0.1:5173/` on both. (For incognito, use a
+   second normal tab on the same profile — incognito lives in a different
+   browsing context group, so the localStorage heartbeat cannot reach it
+   today. The real Supabase channel in v3 will reach incognito.)
+2. Wait ~1 second for both overlays to mount.
+3. Tab A's "Other players" dev strip will already show a chip for tab B's
+   session id, and vice versa. The transport is the localStorage heartbeat
+   published by each tab's `Bootstrap` (see `src/App.tsx`) and absorbed by
+   the other tab's `storage` event listener.
+4. No console commands are needed. The same behavior is asserted in
+   `e2e/presence-two-tab.spec.ts` (gated to skip in CI; the heartbeat is
+   dev-only and the spec is local).
+5. Real cross-network T-4 (Supabase channel + LTI session tokens) is deferred
+   to v3 (task 0304/0307). The localStorage heartbeat stands in for the
+   transport and exercises the < 150 ms feel budget end-to-end on one
+   machine.
 
 **T-5 Human-or-AI spot-check (NPC indistinguishability)**
 1. Join a world with ≥ 3 NPCs and ≥ 1 other human.

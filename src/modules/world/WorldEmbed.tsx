@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { t } from "../i18n/api";
-import { joinWorld, mountBridge } from "../bridge/api";
+import { mountBridge } from "../bridge/api";
 
 const UNITY_BUILD_PATH = "/unity/Build/index.html";
 const PLACEHOLDER_PATH = "/unity/placeholder.html";
@@ -32,9 +32,10 @@ export function WorldEmbed() {
   }, []);
 
   async function handleLoad() {
+    // joinWorld() + sendState() ticks are owned by App's <Bootstrap /> so the
+    // session id stays single-source-of-truth across the shell. The embed's
+    // load event just clears the loading overlay.
     setLoaded(true);
-    // Prove the pipe: join the world on embed load.
-    await joinWorld();
   }
 
   return (

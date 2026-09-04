@@ -143,4 +143,60 @@ describe("presence module", () => {
       first.clearPresence();
     });
   });
+
+  describe("cross-tab heartbeat (localStorage + storage event)", () => {
+    it("publishes a heartbeat to localStorage on start and removes it on clear", async () => {
+      vi.doMock("../bridge/api", () => ({ onState: () => () => {} }));
+      const api = await import("./api");
+      const KEY = "__tc_presence_hb__";
+      localStorage.removeItem(KEY);
+      api.startPresence({ selfId: "tab-A", heartbeatKey: KEY });
+      const raw = localStorage.getItem(KEY);
+      expect(raw).not.toBeNull();
+      const parsed = JSON.parse(raw!);
+      expect(parsed.selfId).toBe("tab-A");
+      expect(parsed.role).toBeTruthy();
+      expect(typeof parsed.ts).toBe("number");
+      api.clearPresence();
+      // clearPresence removes the heartbeat so other tabs see us leave.
+      expect(localStorage.getItem(KEY)).toBeNull();
+    });
+
+    it("absorbs a peer heartbeat written by a sibling tab into the local map", async () => {
+      vi.doMock("../bridge/api", () => ({ onState: () => () => {} }));
+      const api = await import("./api");
+      const KEY = "__tc_presence_hb__";
+      localStorage.removeItem(KEY);
+      api.startPresence({ selfId: "self", heartbeatKey: KEY });
+      // A sibling tab writes its heartbeat. We do not dispatch a storage event
+      // (jsdom does not auto-dispatch cross-window events); we call the
+      // public absorbPeerHeartbeat helper which the storage-event listener
+      // uses in the real browser.
+      api.absorbPeerHeartbeat({
+        selfId: "tab-B",
+        role: "camp",
+        x: 1,
+        y: 2,
+        z: 3,
+        ts: Date.now(),
+      });
+      expect(api.getPresenceMap().has("tab-B")).toBe(true);
+      expect(api.getPresenceMap().get("tab-B")?.role).toBe("camp");
+      api.clearPresence();
+    });
+
+    it("ignores stale peer heartbeats older than the ttlMs window", async () => {
+      vi.doMock("../bridge/api", () => ({ onState: () => () => {} }));
+      const api = await import("./api");
+      api.startPresence({ selfId: "self", peerTtlMs: 1000 });
+      api.absorbPeerHeartbeat({
+        selfId: "stale-tab",
+        role: "scout",
+        x: 0, y: 0, z: 0,
+        ts: Date.now() - 5000, // 5s old
+      });
+      expect(api.getPresenceMap().has("stale-tab")).toBe(false);
+      api.clearPresence();
+    });
+  });
 });

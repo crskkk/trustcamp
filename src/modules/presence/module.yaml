@@ -4,8 +4,11 @@ description: >
   state, prunes stale entries, and exposes a small hook + event bus. Powers
   the dev-only PresenceOverlay HUD strip and is the foundation for the
   multiplayer avatar rendering in task 0103. No PII; the only identifier is
-  the bridge's opaque sessionId. Dev-only window.__tcPresenceTest seam is
+  the bridge's opaque sessionId. Cross-tab sync uses a localStorage
+  heartbeat absorbed via the storage event (works in any same-origin tab
+  pair on one machine; the real Supabase channel in v3 will reach across
+  machines and into incognito). Dev-only window.__tcPresenceTest seam is
   tree-shaken in production builds.
-version: 0.2.0
+version: 0.3.0
 api: src/modules/presence/api.ts
 depends_on: [bridge, i18n]

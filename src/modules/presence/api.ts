@@ -3,12 +3,15 @@
 // Public surface:
 //   - createPresenceMap(opts?): pure state container (unit-testable).
 //   - startPresence(opts?): lazily subscribes to bridge.onState and feeds the
-//     shared map. Idempotent. Also installs the dev-only window.__tcPresenceTest
-//     seam in `import.meta.env.DEV` (tree-shaken in prod).
+//     shared map. Idempotent. Also writes a localStorage heartbeat so other
+//     tabs on the same origin (incl. incognito on the same profile in modern
+//     browsers) learn about this tab and learn when it goes away.
 //   - subscribePresence(cb): returns PresenceEvents as the world changes
 //     ({ kind: "join"|"move"|"leave", playerId, state? }).
 //   - getPresenceMap(): the shared map (read-only by convention).
 //   - clearPresence(): tears down the wiring and clears the map.
+//   - absorbPeerHeartbeat(peer): public so the storage-event listener and the
+//     dev seam can route peer updates through the same merge path.
 //
 // No PII. The only identifier is the bridge's opaque sessionId.
 
@@ -27,17 +30,44 @@ export interface PresenceEvent {
 
 export type PresenceListener = (event: PresenceEvent) => void;
 
+/** A peer's heartbeat record, serialized as JSON in localStorage. */
+export interface PeerHeartbeat {
+  selfId: string;
+  role: string;
+  x: number;
+  y: number;
+  z: number;
+  ts: number;
+}
+
 export interface StartPresenceOptions extends PresenceMapOptions {
   /** The local player's id; updates for this id are ignored. */
   selfId?: string;
   /** Test/dev hook: override how raw bridge states feed into the map. */
   inject?: (state: WorldState) => RemoteState | null;
+  /** localStorage key used for the cross-tab heartbeat. */
+  heartbeatKey?: string;
+  /** How often to refresh our heartbeat (ms). Default 1500. */
+  heartbeatMs?: number;
+  /** Peer heartbeats older than this are dropped (ms). Default 5000. */
+  peerTtlMs?: number;
+  /** Role to advertise in our own heartbeat. */
+  role?: string;
+  /** Current x/y/z to advertise in our own heartbeat. */
+  position?: { x: number; y: number; z: number };
 }
+
+const DEFAULT_HEARTBEAT_KEY = "__tc_presence_hb__";
+const DEFAULT_HEARTBEAT_MS = 1500;
+const DEFAULT_PEER_TTL_MS = 5000;
 
 // ---------- module-level singleton state ----------
 
 let sharedMap: PresenceMap | null = null;
 let bridgeUnsub: (() => void) | null = null;
+let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+let storageHandler: ((evt: StorageEvent) => void) | null = null;
+let currentOpts: StartPresenceOptions | null = null;
 const listeners = new Set<PresenceListener>();
 const TEST_FLAG = "__presence_test__";
 
@@ -62,6 +92,15 @@ function emit(event: PresenceEvent): void {
   for (const cb of listeners) cb(event);
 }
 
+function safeStorage(): Storage | null {
+  try {
+    if (typeof window === "undefined") return null;
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
 // ---------- public surface ----------
 
 export function createPresenceMap(opts?: PresenceMapOptions): PresenceMap {
@@ -72,12 +111,83 @@ export function getPresenceMap(): PresenceMap {
   return ensureMap();
 }
 
+/**
+ * Absorb a peer heartbeat into the local map. Public so the storage-event
+ * listener and the dev seam can route peer updates through the same merge
+ * path. Heartbeats older than peerTtlMs (from currentOpts) are dropped.
+ */
+export function absorbPeerHeartbeat(peer: PeerHeartbeat, now: number = Date.now()): void {
+  const map = ensureMap();
+  const ttl = currentOpts?.peerTtlMs ?? DEFAULT_PEER_TTL_MS;
+  if (now - peer.ts > ttl) return;
+  if (currentOpts?.selfId && peer.selfId === currentOpts.selfId) return;
+  const remote: RemoteState = {
+    playerId: peer.selfId,
+    x: peer.x,
+    y: peer.y,
+    z: peer.z,
+    role: peer.role,
+    ts: peer.ts,
+  };
+  const had = map.has(remote.playerId);
+  map.merge(remote);
+  emit({ kind: had ? "move" : "join", playerId: remote.playerId, state: remote });
+}
+
+function writeHeartbeat(opts: StartPresenceOptions): void {
+  const s = safeStorage();
+  if (!s || !opts.selfId) return;
+  const key = opts.heartbeatKey ?? DEFAULT_HEARTBEAT_KEY;
+  const pos = opts.position ?? { x: 0, y: 0, z: 0 };
+  const role = opts.role ?? "scout";
+  const hb: PeerHeartbeat = {
+    selfId: opts.selfId,
+    role,
+    x: pos.x,
+    y: pos.y,
+    z: pos.z,
+    ts: Date.now(),
+  };
+  try {
+    s.setItem(key, JSON.stringify(hb));
+  } catch {
+    /* storage full or disabled; ignore */
+  }
+}
+
+function readPeerHeartbeat(key: string): PeerHeartbeat | null {
+  const s = safeStorage();
+  if (!s) return null;
+  const raw = s.getItem(key);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as PeerHeartbeat;
+    if (typeof parsed.selfId !== "string" || typeof parsed.ts !== "number") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function pruneStalePeers(_opts: StartPresenceOptions, _now: number): void {
+  // Reserved for future use. Today the per-tab TTL is enforced in
+  // absorbPeerHeartbeat before the entry ever lands in the map.
+}
+
 export function startPresence(opts: StartPresenceOptions = {}): PresenceMap {
-  if (bridgeUnsub) return ensureMap(opts); // idempotent
+  if (bridgeUnsub) {
+    currentOpts = { ...currentOpts, ...opts };
+    if (currentOpts.selfId) writeHeartbeat(currentOpts);
+    return ensureMap(opts);
+  }
   const map = ensureMap(opts);
+  currentOpts = { ...opts };
   const selfId = opts.selfId;
   const inject = opts.inject ?? defaultInject;
+  const key = opts.heartbeatKey ?? DEFAULT_HEARTBEAT_KEY;
 
+  // 1) Subscribe to the bridge — the real source of truth when Supabase is
+  //    configured; in-memory fallback otherwise (single-tab; harmless).
   bridgeUnsub = onState((raw: WorldState) => {
     if (selfId && raw.playerId === selfId) return;
     const remote = inject(raw);
@@ -85,12 +195,47 @@ export function startPresence(opts: StartPresenceOptions = {}): PresenceMap {
     const had = map.has(remote.playerId);
     map.merge(remote);
     emit({ kind: had ? "move" : "join", playerId: remote.playerId, state: remote });
+    // Update our own heartbeat so the peer slot reflects latest known pos.
+    if (currentOpts?.selfId) {
+      currentOpts = { ...currentOpts, role: remote.role, position: { x: remote.x, y: remote.y, z: remote.z } };
+      writeHeartbeat(currentOpts);
+    }
   });
 
-  // Dev-only test seam. tree-shaken by Vite because `import.meta.env.DEV` is a
-  // compile-time constant false in production builds.
+  // 2) Cross-tab heartbeat: write our own + read peers via the storage event.
+  if (selfId) writeHeartbeat(currentOpts);
+  if (typeof window !== "undefined") {
+    storageHandler = (evt: StorageEvent) => {
+      if (evt.key !== key) return;
+      if (evt.newValue === null) {
+        // A peer removed their heartbeat → "leave"
+        // We don't know who from the key alone; emit for every non-self.
+        if (sharedMap) {
+          for (const id of sharedMap.ids()) {
+            if (id !== currentOpts?.selfId) emit({ kind: "leave", playerId: id });
+          }
+          sharedMap.clear();
+          sharedMap = null;
+        }
+        return;
+      }
+      const peer = readPeerHeartbeat(key);
+      if (peer) absorbPeerHeartbeat(peer);
+    };
+    window.addEventListener("storage", storageHandler);
+
+    // Bootstrap from the existing heartbeat (handles reload of a sibling tab
+    // before its first write).
+    const existing = readPeerHeartbeat(key);
+    if (existing && existing.selfId !== selfId) absorbPeerHeartbeat(existing);
+  }
+  heartbeatTimer = setInterval(() => {
+    if (currentOpts?.selfId) writeHeartbeat(currentOpts);
+  }, opts.heartbeatMs ?? DEFAULT_HEARTBEAT_MS);
+
+  // 3) Dev-only test seam for in-app synthetic pushes. Tree-shaken in prod.
   if (import.meta.env.DEV) {
-    installTestSeam(map);
+    installTestSeam();
   }
 
   return map;
@@ -108,36 +253,42 @@ export function clearPresence(): void {
     bridgeUnsub();
     bridgeUnsub = null;
   }
+  if (heartbeatTimer) {
+    clearInterval(heartbeatTimer);
+    heartbeatTimer = null;
+  }
+  if (storageHandler && typeof window !== "undefined") {
+    window.removeEventListener("storage", storageHandler);
+    storageHandler = null;
+  }
+  if (currentOpts?.selfId && currentOpts.heartbeatKey) {
+    const s = safeStorage();
+    try { s?.removeItem(currentOpts.heartbeatKey ?? DEFAULT_HEARTBEAT_KEY); } catch { /* ignore */ }
+  } else if (currentOpts?.selfId) {
+    const s = safeStorage();
+    try { s?.removeItem(DEFAULT_HEARTBEAT_KEY); } catch { /* ignore */ }
+  }
   if (sharedMap) {
-    // Clear the map first (fires shape-change for any listener with a
-    // closed-over map ref), then drop the reference, then emit "leave"
-    // events for downstream consumers that only listen on the bus.
     const ids = sharedMap.ids();
     sharedMap.clear();
     sharedMap = null;
     for (const id of ids) emit({ kind: "leave", playerId: id });
   }
+  currentOpts = null;
   listeners.clear();
 }
 
 // ---------- dev-only test seam ----------
 
-/**
- * Dev-only: a cross-tab fan-out for the test seam, so two local browser tabs
- * can demonstrate T-4 without a real Supabase server. Tree-shaken by Vite in
- * production builds because `import.meta.env.DEV` is a compile-time constant.
- */
 type SeamMsg =
   | { kind: "remote"; state: RemoteState }
   | { kind: "clear" };
 
-function installTestSeam(initialMap: PresenceMap): void {
+function installTestSeam(): void {
   const w = window as unknown as Record<string, unknown> & { __tcPresenceTest?: unknown };
   const channel: BroadcastChannel | null =
     typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("__tcPresenceTest__") : null;
 
-  // The seam always reads the *current* shared map (which may be replaced by
-  // a clear()). Reading it through the helper each time avoids stale closures.
   const liveMap = (): PresenceMap => ensureMap();
 
   if (channel) {
@@ -180,5 +331,6 @@ function installTestSeam(initialMap: PresenceMap): void {
     },
     get map(): PresenceMap { return liveMap(); },
     channel,
+    absorbPeerHeartbeat,
   };
 }
