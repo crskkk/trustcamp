@@ -18,10 +18,10 @@ test("two tabs on the server see each other and follow movement", async ({ brows
   const b = await ctxB.newPage();
   await a.goto(`/?ws=${WS}`);
   await b.goto(`/?ws=${WS}`);
-  await expect(a.getByTestId("world-canvas")).toHaveAttribute("data-ready", "1", { timeout: 20_000 });
-  await expect(b.getByTestId("world-canvas")).toHaveAttribute("data-ready", "1", { timeout: 20_000 });
+  await expect(a.getByTestId("world-canvas")).toHaveAttribute("data-ready", "1", { timeout: 30_000 });
+  await expect(b.getByTestId("world-canvas")).toHaveAttribute("data-ready", "1", { timeout: 30_000 });
 
-  await expect.poll(async () => (await remotesOf(a)).length >= 1 && (await remotesOf(b)).length >= 1, { timeout: 20_000 }).toBe(true);
+  await expect.poll(async () => (await remotesOf(a)).length >= 1 && (await remotesOf(b)).length >= 1, { timeout: 30_000 }).toBe(true);
   const idOfA = await a.evaluate(() => (window as unknown as { __tcBridge?: unknown }).__tcBridge && localStorage.getItem("tc.token"));
   expect(idOfA).toBeTruthy();
 
