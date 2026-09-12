@@ -45,5 +45,10 @@
   "presence.role.hacker": "Hacker",
   "npc.role.prospect": "Prospecto",
   "npc.dev.label": "NPCs",
-  "npc.dev.clear": "Limpar NPCs"
+  "npc.dev.clear": "Limpar NPCs",
+  "world.nogl": "Seu navegador não conseguiu iniciar o WebGL. Tente um navegador mais novo ou ative a aceleração por hardware.",
+  "world.hint": "WASD / setas para andar - Espaço para pular - E para acenar (arraste o joystick no toque)",
+  "world.move": "Mover",
+  "world.jump": "Pular",
+  "presence.role.prospect": "Prospecto"
 }

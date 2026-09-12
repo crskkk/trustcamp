@@ -78,10 +78,8 @@ export function onState(cb: (state: WorldState) => void): Unsubscribe {
 }
 
 /**
- * Install the Unity-facing bridge on a window object. The embedded Unity build
- * calls `parent.__tcBridge.joinWorld()` / `.sendState(...)` / `.onState(cb)`,
- * which delegate here. Shell→Unity pushes go through the iframe's
- * `UnityGame.SendMessage`.
+ * Install the bridge on a window object as `__tcBridge` (a debug / host
+ * console seam; the screensaver also parks its camera sentinel here).
  */
 export function mountBridge(
   target: Window & typeof globalThis
@@ -92,17 +90,4 @@ export function mountBridge(
     sendState,
     onState,
   };
-}
-
-/** Send a message into the embedded Unity build (shell → Unity). */
-export function sendToUnity(
-  frame: HTMLIFrameElement | null,
-  gameObject: string,
-  method: string,
-  arg: string
-): void {
-  const w = frame?.contentWindow as unknown as
-    | { UnityGame?: { SendMessage?: (go: string, m: string, a: string) => void } }
-    | undefined;
-  w?.UnityGame?.SendMessage?.(gameObject, method, arg);
 }

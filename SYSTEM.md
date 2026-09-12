@@ -65,8 +65,8 @@
 - **depends_on:** i18n
 - **description:** TEMPORARY dev-only System Status overlay (task 0001). Renders live worker status lights, test pass %, SYSTEM.md preview, and the version chip. This module is the temporary visual artifact required by GAUNTLET.md §1 for a backend component; it is absorbed by the real HUD (task 0006) or Admin panel (task 0306) and this folder is removed at that time.
 
-### world `0.2.0`
+### world3d `0.1.0`
 
-- **api:** `src/modules/world/api.ts`
-- **depends_on:** bridge, i18n
-- **description:** The React iframe host for the embedded Unity WebGL world. Renders the iframe at /unity/Build/index.html, installs the bridge on mount, and shows a localized loading overlay until the build loads. Calls bridge.joinWorld() on load to prove the Unity↔shell pipe. The actual Unity build is task 0003.
+- **api:** `src/modules/world3d/api.ts`
+- **depends_on:** avatar, i18n
+- **description:** The 3D world, rendered in-browser with Three.js (replaces the Unity WebGL embed). A low-poly mini-planet with four areas - campground with large structures, lake with a dock, forest with trails, hills - plus the procedural Animal-Crossing-style character builder, sphere-walk locomotion, chase camera, toon lighting, sky/clouds/water. Exposes the React WorldCanvas plus a small imperative surface (getWorld, onFrame, setOrbit, npcWanderBy) so presence/npc/minigame modules can place bodies and props without touching Three.js internals. Pure planet math (heightAt, biomeAt, walker) is unit tested and shared with the server for authoritative checks.

@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { t } from "./modules/i18n/api";
 import { useHudLang } from "./modules/hud/api";
 import { StatusPanel } from "./modules/statuspanel/StatusPanel";
-import { WorldEmbed } from "./modules/world/api";
+import { WorldCanvas, getWorld, npcWanderBy } from "./modules/world3d/api";
 import { Hud } from "./modules/hud/api";
 import { startOrbit, stopOrbit } from "./modules/screensaver/api";
-import { PresenceOverlay } from "./modules/presence/api";
-import { joinWorld as bridgeJoinWorld, sendState as bridgeSendState } from "./modules/bridge/api";
+import { PresenceOverlay, startPresence, subscribePresence } from "./modules/presence/api";
+import { joinWorld as bridgeJoinWorld, sendState as bridgeSendState, mountBridge } from "./modules/bridge/api";
 import { spawnNpc, clearNpcs, listNpcs, setNpcCap } from "./modules/npc/api";
 import { startNpcMotion, stopNpcMotion } from "./modules/npc/bridge";
 import * as bridgeApi from "./modules/bridge/api";
@@ -20,7 +20,7 @@ export function App() {
       <Bootstrap />
       <Hud>
         <AppSubtitle />
-        <WorldEmbed />
+        <WorldCanvas seed={PLAYER_SEED} />
       </Hud>
       {import.meta.env.DEV && (
         <>
@@ -41,49 +41,72 @@ const SELF_ID: string =
     (window.crypto?.randomUUID?.() ?? "self-" + Math.random().toString(36).slice(2, 12))) ||
   "self";
 
+const SEED_KEY = "tc.avatar.seed";
+
+/** The local camper's look. Persisted so a reload keeps the same avatar. */
+const PLAYER_SEED: number = (() => {
+  try {
+    const stored = typeof window !== "undefined" ? window.localStorage.getItem(SEED_KEY) : null;
+    if (stored && /^\d+$/.test(stored)) return Number(stored);
+    const fresh = Math.floor(Math.random() * 1_000_000);
+    window.localStorage.setItem(SEED_KEY, String(fresh));
+    return fresh;
+  } catch {
+    return 4242;
+  }
+})();
+
+const NPC_SEEDS = [101, 202, 303, 404, 505];
+const PUBLISH_MS = 250;
+
 /**
- * Join the bridge world and tick a position on a 2-second cadence so the
- * PresenceOverlay can populate from sibling tabs in dev (and so the
- * real Supabase channel — when configured — also sees us in v3).
- *
- * Also seeds a small NPC population in dev so the chip strip is non-empty
- * on first load (task 0103). Real spawn policy / dynamics land in 0104.
+ * Join the bridge world, publish the player's real position at PUBLISH_MS,
+ * mirror presence into 3D bodies, and stroll a small NPC population along
+ * the trails. Multiplayer transport lands in v2.2 (server/); today the
+ * in-memory bridge + localStorage heartbeat make sibling tabs visible.
  */
 function Bootstrap(): null {
   useEffect(() => {
     let stopped = false;
     let timer: ReturnType<typeof setInterval> | null = null;
+    let unsub: (() => void) | null = null;
+    mountBridge(window); // host-console / e2e seam: window.__tcBridge
     (async () => {
       const join = await bridgeJoinWorld();
       const id = join.sessionId || SELF_ID;
       if (stopped) return;
+      startPresence({ selfId: id, role: "scout" });
+      unsub = subscribePresence((evt) => {
+        const w = getWorld();
+        if (!w) return;
+        if (evt.kind === "leave") w.removeRemote(evt.playerId);
+        else if (evt.state) w.setRemote(evt.playerId, { x: evt.state.x, y: evt.state.y, z: evt.state.z, role: evt.state.role });
+      });
       const tick = () => {
-        bridgeSendState({
-          playerId: id,
-          x: 0,
-          y: 0,
-          z: 0,
-          role: "scout",
-        }).catch(() => undefined);
+        const s = getWorld()?.getPlayerSnapshot();
+        const pos = s ? { x: s.x, y: s.y, z: s.z } : { x: 0, y: 0, z: 0 };
+        bridgeSendState({ playerId: id, ...pos, role: "scout" }).catch(() => undefined);
+        startPresence({ selfId: id, role: "scout", position: pos });
       };
       tick();
-      timer = setInterval(tick, 2000);
+      timer = setInterval(tick, PUBLISH_MS);
 
-      // Seed a small dev population of NPCs (task 0103). 3 deterministic
-      // prospects so the visual checkpoint is reproducible across runs.
       setNpcCap(8);
-      for (const seed of [101, 202, 303]) {
-        spawnNpc({ seed, role: "prospect" });
-      }
-      // Start the per-tick publish loop (task 0104). The shell drives a
-      // synthetic shell-side step so the chip strip and (eventually) the
-      // Unity NpcController see motion. Real per-frame locomotion is in
-      // Unity (PlayerController.Step) — the shell just publishes state.
-      startNpcMotion({ bridge: bridgeApi, tickMs: 2000 });
+      for (const seed of NPC_SEEDS) spawnNpc({ seed, role: "prospect", position: npcWanderBy(seed, 0) });
+      startNpcMotion({
+        bridge: bridgeApi,
+        tickMs: PUBLISH_MS,
+        speedMps: 2.4,
+        stepPosition: (npc, distance) => {
+          const m = /^npc-(\d+)$/.exec(npc.id);
+          return m ? npcWanderBy(Number(m[1]), distance) : npc.position;
+        },
+      });
     })();
     return () => {
       stopped = true;
       if (timer) clearInterval(timer);
+      unsub?.();
       stopNpcMotion();
     };
   }, []);
@@ -116,9 +139,6 @@ function NpcDevControls(): JSX.Element {
   );
 }
 
-// Tiny local hook so the dev control re-renders when the spawner mutates
-// the list. We don't subscribe to presence events here (kept small); we
-// just read listNpcs() on demand and on click.
 function useStateNpcs(): [number, (n: number) => void] {
   const [n, setN] = useState(() => (typeof window === "undefined" ? 0 : listNpcs().length));
   useEffect(() => {
@@ -140,16 +160,11 @@ function Screensaver(): JSX.Element {
   }, []);
   return (
     <div className="tc-app">
-      <WorldEmbed />
+      <WorldCanvas seed={PLAYER_SEED} />
     </div>
   );
 }
 
-/**
- * AppSubtitle component that reads language from HUD context.
- * Uses useHudLang() to get the current language and renders
- * a localized subtitle that updates when language changes.
- */
 function AppSubtitle(): JSX.Element {
   const { lang } = useHudLang();
   return <p className="tc-app-subtitle">{t("app.subtitle", lang)}</p>;
