@@ -29,11 +29,23 @@
 - **depends_on:** —
 - **description:** Localization module. Exposes t(key, lang) and detectLang(). Holds the en/es/pt dictionaries. Other modules must not hold user-facing string literals; they call this module's api. The i18n-check worker verifies coverage against these dictionaries.
 
+### leaderboard `0.1.0`
+
+- **api:** `src/modules/leaderboard/api.ts`
+- **depends_on:** bridge
+- **description:** Real-time leaderboard. Keeps one row per player (opaque id, generated camper nickname from the avatar seed, score, level, rounds) - the local player's row is fed by minigame round results; other players' rows arrive through the bridge state stream (score/level ride along with position). Rows go stale after 12 s without an update. Team score = sum of present players.
+
 ### lti `0.1.0`
 
 - **api:** `src/modules/lti/api.ts`
 - **depends_on:** —
 - **description:** LTI 1.3 Phase C scaffold: OIDC login handler, JWT validation, and session token emit with privacy-first design. Only the opaque 'sub' claim is used; no PII (name, email, etc.) is ever requested or stored.
+
+### minigames `0.1.0`
+
+- **api:** `src/modules/minigames/api.ts`
+- **depends_on:** world3d, scorebus, i18n
+- **description:** The Minigame Engine: a registry of self-contained event files (events/<slug>.ts) and a round runner (start / tick / end) with a world-facing context (pickups, player distance, campfire, awards, progress, toasts). Rounds are 15-90 s and emit a scorebus RoundEnvelope on end. Passive events (foraging) run alongside rounds and award XP directly. Adding a game = one new file under events/ plus one register() call.
 
 ### npc `0.3.0`
 
@@ -46,6 +58,12 @@
 - **api:** `src/modules/presence/api.ts`
 - **depends_on:** bridge, i18n
 - **description:** Realtime presence view: subscribes to the bridge, normalizes per-player state, prunes stale entries, and exposes a small hook + event bus. Powers the dev-only PresenceOverlay HUD strip and is the foundation for the multiplayer avatar rendering in task 0103. No PII; the only identifier is the bridge's opaque sessionId. Cross-tab sync uses a localStorage heartbeat absorbed via the storage event (works in any same-origin tab pair on one machine; the real Supabase channel in v3 will reach across machines and into incognito). Dev-only window.__tcPresenceTest seam is tree-shaken in production builds.
+
+### progress `0.1.0`
+
+- **api:** `src/modules/progress/api.ts`
+- **depends_on:** —
+- **description:** Player progression: XP total, level curve, level-up events. Pure curve functions (xpForLevel, levelFromXp) plus a small persisted store (localStorage in solo mode; the server store plugs in through setProgressPersistence). No PII - keyed only by the opaque player id the caller supplies.
 
 ### scorebus `0.1.0`
 

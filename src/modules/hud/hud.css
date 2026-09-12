@@ -134,3 +134,115 @@
   padding: 8px;
   min-height: 0;
 }
+
+/* ---- game-facing chrome (v2.1): values, XP bar, play bar, round panel, toast ---- */
+.tc-hud-value {
+  margin-left: 6px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #ffe08a;
+}
+.tc-hud-row--level { gap: 0; }
+.tc-hud-xp {
+  display: inline-block;
+  width: 54px;
+  height: 6px;
+  margin-left: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+.tc-hud-xp-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #9bd66b, #ffe08a);
+  transition: width 0.4s ease;
+}
+.tc-hud-play {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 8px;
+  pointer-events: none;
+}
+.tc-hud-play-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+.tc-hud-play-btn {
+  pointer-events: auto;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 200, 90, 0.9);
+  color: #3b2f22;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.tc-hud-play-btn:hover, .tc-hud-play-btn:focus-visible { background: #ffd777; outline: 2px solid #fff3c4; outline-offset: 1px; }
+
+.tc-round {
+  position: fixed;
+  top: 60px;
+  right: 14px;
+  z-index: 21;
+  min-width: 190px;
+  padding: 10px 12px 12px;
+  border-radius: 14px;
+  background: rgba(8, 10, 18, 0.62);
+  backdrop-filter: blur(8px);
+  color: #f4f4f6;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.tc-round-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; color: #ffe08a; }
+.tc-round-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 12px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.tc-round-key { color: rgba(255, 255, 255, 0.7); }
+.tc-round-time { font-weight: 700; font-size: 20px; line-height: 1; }
+.tc-round-time.is-low { color: #ff8a80; }
+.tc-round-progress, .tc-round-points, .tc-round-team { font-weight: 600; text-align: right; }
+.tc-round-stop {
+  margin-top: 10px;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  font-size: 12px;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+.tc-round-stop:hover, .tc-round-stop:focus-visible { background: rgba(255, 255, 255, 0.18); outline: 2px solid #5fa8ff; }
+
+.tc-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  z-index: 22;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(255, 246, 214, 0.95);
+  color: #3b2f22;
+  font: 600 14px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  animation: tc-toast-in 0.25s ease-out;
+}
+@keyframes tc-toast-in {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tc-toast { animation: none; }
+  .tc-hud-xp-fill { transition: none; }
+}

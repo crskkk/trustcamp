@@ -18,6 +18,7 @@ import { InputState } from "./input";
 import { createWalker, stepWalker, tangentOf, turnToward, type WalkerState } from "./walker";
 import { PLANET_RADIUS, REGIONS, offsetDir, surfaceRadius, isWalkable, frameAt, angDist, type V3 } from "./planet";
 import { emitFrame } from "./registry";
+import { PickupLayer, type PickupKind, type PickupOpts } from "./pickups";
 
 export type Quality = "high" | "low";
 
@@ -75,6 +76,7 @@ export class World {
   readonly water: Water;
   readonly sky: Sky;
   readonly remotes = new Map<string, Remote>();
+  readonly pickups = new PickupLayer();
   propCount = 0;
   fps = 60;
   private player: { rig: CharacterRig; walker: WalkerState; jumpY: number; jumpVel: number; grounded: boolean; speed01: number; squash: number; emoteT: number; seed: number };
@@ -111,6 +113,7 @@ export class World {
     this.scene.add(this.water.mesh);
     this.sky = createSky();
     this.scene.add(this.sky.group);
+    this.scene.add(this.pickups.group);
 
     const spawn = offsetDir(REGIONS.camp, 0.5, -3.2);
     const rig = buildCharacter(generate(opts.seed));
@@ -158,6 +161,31 @@ export class World {
   }
   setOrbitYaw(deg: number): void {
     this.chase.orbitYawDeg = deg;
+  }
+
+  // ---- pickups (minigame collectibles) ----
+  addPickup(id: string, kind: PickupKind, pos: V3, opts?: PickupOpts): void {
+    this.pickups.add(id, kind, pos, opts);
+  }
+  setPickup(id: string, opts: PickupOpts): void {
+    this.pickups.set(id, opts);
+  }
+  removePickup(id: string): void {
+    this.pickups.remove(id);
+  }
+  clearPickups(prefix?: string): void {
+    this.pickups.clear(prefix);
+  }
+  /** World position of the campfire (delivery point). */
+  campfirePosition(): V3 {
+    const c = this.camp.campfire;
+    return { x: c.x, y: c.y, z: c.z };
+  }
+  /** Surface distance (m) from the player's feet to a world position. */
+  distanceToPlayer(pos: V3): number {
+    const d = this.player.walker.dir;
+    const m = Math.hypot(pos.x, pos.y, pos.z) || 1;
+    return angDist({ x: d.x, y: d.y, z: d.z }, { x: pos.x / m, y: pos.y / m, z: pos.z / m }) * PLANET_RADIUS;
   }
 
   /** Move the player to a unit direction (spawn points, dev/e2e vantage checks). */
@@ -305,6 +333,7 @@ export class World {
     this.sky.update(this.chase.camera.position, _up, _sunDir, dt);
     this.water.update(this.t);
     this.camp.update(this.t, dt);
+    this.pickups.update(this.t, dt);
 
     emitFrame(dt, this.t);
     this.renderer.render(this.scene, this.chase.camera);

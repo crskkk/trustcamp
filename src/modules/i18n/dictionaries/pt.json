@@ -50,5 +50,14 @@
   "world.hint": "WASD / setas para andar - Espaço para pular - E para acenar (arraste o joystick no toque)",
   "world.move": "Mover",
   "world.jump": "Pular",
-  "presence.role.prospect": "Prospecto"
+  "presence.role.prospect": "Prospecto",
+  "hud.play": "Jogar",
+  "hud.stop": "Encerrar rodada",
+  "hud.time": "Tempo",
+  "hud.points": "Pontos",
+  "hud.xp": "XP",
+  "hud.team": "Equipe",
+  "hud.toast.levelUp": "Subiu de nível! Você chegou ao nível {n}",
+  "hud.toast.roundOver": "Rodada encerrada: {p} pontos",
+  "hud.toast.roundTimeout": "Acabou o tempo! {p} pontos"
 }

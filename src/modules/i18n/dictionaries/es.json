@@ -50,5 +50,14 @@
   "world.hint": "WASD / flechas para caminar - Espacio para saltar - E para saludar (arrastra el joystick en táctil)",
   "world.move": "Mover",
   "world.jump": "Saltar",
-  "presence.role.prospect": "Prospecto"
+  "presence.role.prospect": "Prospecto",
+  "hud.play": "Jugar",
+  "hud.stop": "Terminar ronda",
+  "hud.time": "Tiempo",
+  "hud.points": "Puntos",
+  "hud.xp": "XP",
+  "hud.team": "Equipo",
+  "hud.toast.levelUp": "¡Subiste de nivel! Alcanzaste el nivel {n}",
+  "hud.toast.roundOver": "Ronda terminada: {p} puntos",
+  "hud.toast.roundTimeout": "¡Se acabó el tiempo! {p} puntos"
 }

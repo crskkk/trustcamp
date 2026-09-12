@@ -1,0 +1,11 @@
+name: leaderboard
+description: >-
+  Real-time leaderboard. Keeps one row per player (opaque id, generated
+  camper nickname from the avatar seed, score, level, rounds) - the local
+  player's row is fed by minigame round results; other players' rows arrive
+  through the bridge state stream (score/level ride along with position). Rows
+  go stale after 12 s without an update. Team score = sum of present players.
+version: 0.1.0
+api: src/modules/leaderboard/api.ts
+depends_on:
+  - bridge

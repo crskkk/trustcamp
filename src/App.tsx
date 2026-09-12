@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { t } from "./modules/i18n/api";
-import { useHudLang } from "./modules/hud/api";
+import { t, type Lang } from "./modules/i18n/api";
+import { useHudLang, Hud, setHudGame, showHudToast, type LangText } from "./modules/hud/api";
 import { StatusPanel } from "./modules/statuspanel/StatusPanel";
 import { WorldCanvas, getWorld, npcWanderBy } from "./modules/world3d/api";
-import { Hud } from "./modules/hud/api";
 import { startOrbit, stopOrbit } from "./modules/screensaver/api";
 import { PresenceOverlay, startPresence, subscribePresence } from "./modules/presence/api";
-import { joinWorld as bridgeJoinWorld, sendState as bridgeSendState, mountBridge } from "./modules/bridge/api";
+import { joinWorld as bridgeJoinWorld, sendState as bridgeSendState, onState as bridgeOnState, mountBridge } from "./modules/bridge/api";
 import { spawnNpc, clearNpcs, listNpcs, setNpcCap } from "./modules/npc/api";
 import { startNpcMotion, stopNpcMotion } from "./modules/npc/bridge";
 import * as bridgeApi from "./modules/bridge/api";
+import { registerDefaults, list as listGames, startRound, endRound, startPassive, attachFrameDriver, subscribe as subscribeRounds, type RoundState } from "./modules/minigames/api";
+import { getProgress, grantXp, subscribeProgress } from "./modules/progress/api";
+import { setSelf, addSelfScore, setSelfLevel, selfPublish, startLeaderboard, subscribeLeaderboard } from "./modules/leaderboard/api";
 
 export function App() {
   if (typeof window !== "undefined" && window.location.pathname === "/screensaver") {
@@ -18,7 +20,7 @@ export function App() {
   return (
     <div className="tc-app">
       <Bootstrap />
-      <Hud>
+      <Hud onAction={(slug) => startRound(slug, { playerId: SELF_ID, sessionId: SESSION_ID, role: "scout" })} onStop={() => endRound("stopped")}>
         <AppSubtitle />
         <WorldCanvas seed={PLAYER_SEED} />
       </Hud>
@@ -33,13 +35,12 @@ export function App() {
   );
 }
 
-// Each tab mints its own opaque session id at module load. Sharing this with
-// the cross-tab heartbeat lets other tabs dedupe "self" correctly without
-// needing a backend identity provider.
+// Each tab mints its own opaque player id at module load. No PII anywhere.
 const SELF_ID: string =
   (typeof window !== "undefined" &&
     (window.crypto?.randomUUID?.() ?? "self-" + Math.random().toString(36).slice(2, 12))) ||
   "self";
+const SESSION_ID = "solo";
 
 const SEED_KEY = "tc.avatar.seed";
 
@@ -58,38 +59,56 @@ const PLAYER_SEED: number = (() => {
 
 const NPC_SEEDS = [101, 202, 303, 404, 505];
 const PUBLISH_MS = 250;
+const LANGS: Lang[] = ["en", "es", "pt"];
+
+/** Localised text from a dictionary key with {var} substitutions. */
+function fmt(key: string, vars: Record<string, string>): LangText {
+  const out = {} as LangText;
+  for (const l of LANGS) out[l] = Object.entries(vars).reduce((s, [k, v]) => s.replace(`{${k}}`, v), t(key, l));
+  return out;
+}
+
+function roundView(s: RoundState) {
+  return { title: s.meta.title, timeLeft: s.timeLeft, current: s.progress.current, total: s.progress.total, label: s.progress.label, points: s.points };
+}
 
 /**
- * Join the bridge world, publish the player's real position at PUBLISH_MS,
- * mirror presence into 3D bodies, and stroll a small NPC population along
- * the trails. Multiplayer transport lands in v2.2 (server/); today the
- * in-memory bridge + localStorage heartbeat make sibling tabs visible.
+ * Join the bridge world, publish the player's position + score at PUBLISH_MS,
+ * mirror presence into 3D bodies, stroll the NPC villagers, and wire the
+ * minigame engine, XP and leaderboard into the HUD. Multiplayer transport
+ * lands in v2.2 (server/); today the in-memory bridge + localStorage heartbeat
+ * make sibling tabs visible.
  */
 function Bootstrap(): null {
   useEffect(() => {
     let stopped = false;
-    let timer: ReturnType<typeof setInterval> | null = null;
-    let unsub: (() => void) | null = null;
+    const timers: ReturnType<typeof setInterval>[] = [];
+    const unsubs: Array<() => void> = [];
     mountBridge(window); // host-console / e2e seam: window.__tcBridge
+    const id = SELF_ID;
+    const seeds = new Map<string, number>();
+
     (async () => {
-      const join = await bridgeJoinWorld();
-      const id = join.sessionId || SELF_ID;
+      await bridgeJoinWorld();
       if (stopped) return;
       startPresence({ selfId: id, role: "scout" });
-      unsub = subscribePresence((evt) => {
+      unsubs.push(bridgeOnState((s) => {
+        if (typeof s.seed === "number") seeds.set(s.playerId, s.seed);
+      }));
+      unsubs.push(subscribePresence((evt) => {
         const w = getWorld();
         if (!w) return;
         if (evt.kind === "leave") w.removeRemote(evt.playerId);
-        else if (evt.state) w.setRemote(evt.playerId, { x: evt.state.x, y: evt.state.y, z: evt.state.z, role: evt.state.role });
-      });
+        else if (evt.state) w.setRemote(evt.playerId, { x: evt.state.x, y: evt.state.y, z: evt.state.z, role: evt.state.role, seed: seeds.get(evt.playerId) });
+      }));
       const tick = () => {
         const s = getWorld()?.getPlayerSnapshot();
         const pos = s ? { x: s.x, y: s.y, z: s.z } : { x: 0, y: 0, z: 0 };
-        bridgeSendState({ playerId: id, ...pos, role: "scout" }).catch(() => undefined);
+        bridgeSendState({ playerId: id, ...pos, role: "scout", ...selfPublish() }).catch(() => undefined);
         startPresence({ selfId: id, role: "scout", position: pos });
       };
       tick();
-      timer = setInterval(tick, PUBLISH_MS);
+      timers.push(setInterval(tick, PUBLISH_MS));
 
       setNpcCap(8);
       for (const seed of NPC_SEEDS) spawnNpc({ seed, role: "prospect", position: npcWanderBy(seed, 0) });
@@ -103,10 +122,64 @@ function Bootstrap(): null {
         },
       });
     })();
+
+    // --- game systems (need the 3D world for pickups; wait for it to mount) ---
+    registerDefaults();
+    setSelf({ playerId: id, seed: PLAYER_SEED, level: getProgress().level });
+    startLeaderboard();
+    const p0 = getProgress();
+    setHudGame({
+      level: p0.level, xpInto: p0.into, xpNeed: p0.need,
+      games: listGames().filter((m) => !m.passive).map((m) => ({ slug: m.slug, title: m.title })),
+    });
+    unsubs.push(subscribeProgress((v, grant) => {
+      setHudGame({ level: v.level, xpInto: v.into, xpNeed: v.need });
+      setSelfLevel(v.level);
+      if (grant?.leveledUp) showHudToast(fmt("hud.toast.levelUp", { n: String(grant.to) }));
+    }));
+    unsubs.push(subscribeLeaderboard((rows) => {
+      const me = rows.find((r) => r.self);
+      setHudGame({ score: me?.score ?? 0, teamScore: rows.reduce((s, r) => s + r.score, 0) });
+    }));
+    unsubs.push(subscribeRounds((e) => {
+      switch (e.kind) {
+        case "start":
+        case "tick":
+        case "progress":
+          setHudGame({ round: roundView(e.state) });
+          break;
+        case "award":
+          if (e.passive) {
+            grantXp(e.points);
+            if (e.why) showHudToast(e.why);
+          } else if (e.state) setHudGame({ round: roundView(e.state) });
+          break;
+        case "toast":
+          showHudToast(e.text);
+          break;
+        case "end":
+          setHudGame({ round: null });
+          if (e.envelope) {
+            grantXp(e.envelope.points);
+            addSelfScore(e.envelope.points);
+            showHudToast(fmt(e.reason === "timeout" ? "hud.toast.roundTimeout" : "hud.toast.roundOver", { p: String(e.envelope.points) }));
+          }
+          break;
+      }
+    }));
+    const waitWorld = setInterval(() => {
+      if (!getWorld()) return;
+      clearInterval(waitWorld);
+      unsubs.push(attachFrameDriver());
+      startPassive("foraging", { playerId: id });
+    }, 100);
+    timers.push(waitWorld);
+
     return () => {
       stopped = true;
-      if (timer) clearInterval(timer);
-      unsub?.();
+      for (const tm of timers) clearInterval(tm);
+      for (const u of unsubs) u();
+      endRound("stopped");
       stopNpcMotion();
     };
   }, []);
@@ -150,8 +223,7 @@ function useStateNpcs(): [number, (n: number) => void] {
 
 /**
  * Screensaver / landing mode (task 0009): the planet full-bleed with no HUD
- * chrome, camera auto-orbiting under shell control. The detach hook
- * (window.__tcScreensaver.stop) is where host steering lands later.
+ * chrome, camera auto-orbiting under shell control.
  */
 function Screensaver(): JSX.Element {
   useEffect(() => {

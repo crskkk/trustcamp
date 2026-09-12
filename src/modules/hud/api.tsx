@@ -2,34 +2,27 @@
 //
 // Exports:
 //   - Hud: the root component, mount once at the top of the app.
-//   - useHudLang(): a hook returning the current HUD language and a setter
-//     so future HUD-connected panels (notifications, role chip) can read
-//     the same language without coupling to React Context's internals.
-//   - HudLangProvider: opt-in provider for sub-trees that need to read
-//     the active lang without becoming a child of <Hud />.
+//   - useHudLang(): the active language + setter (shared with sub-panels).
+//   - HudLangProvider: opt-in provider for sub-trees outside <Hud />.
+//   - setHudGame / showHudToast / useHudGame: a tiny external store for the
+//     game-facing chrome (score, level + XP, active round, toast, play list).
+//     Game modules push values in; the chrome renders them. No game logic here.
 //
-// The HUD owns its own collapsed/expanded state and active language.
-// Both are persisted in localStorage so the chrome remembers the player's
-// preference across reloads. The default language falls back to
-// detectLang(navigator.language) (i18n/api.ts).
-//
-// The lang state is shared across the tree via a small React context
-// provided by <Hud />. <Hud />'s children can call useHudLang() and see
-// the same value as the chrome. Outside <Hud />, the hook falls back to
-// a local state for unit-test ergonomics (so a single component can
-// mount and assert on the hook in isolation).
+// The HUD owns its own collapsed/expanded state and active language, both
+// persisted in localStorage.
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { t, detectLang, type Lang } from "../i18n/api";
 import { HudRoot } from "./HudRoot";
 import "./hud.css";
 
-/** Re-export of i18n.Lang so callers don't have to import from i18n/api. */
 export type HudLang = Lang;
+export type LangText = Record<Lang, string>;
 
 const LANG_KEY = "tc.lang";
 const COLLAPSED_KEY = "tc.hud.collapsed";
+const TOAST_MS = 2600;
 
 function safeStorage(): Storage | null {
   try {
@@ -49,11 +42,56 @@ function readLang(): Lang {
 
 function readCollapsed(): boolean {
   const s = safeStorage();
-  const v = s?.getItem(COLLAPSED_KEY);
-  if (v === "true") return true;
-  if (v === "false") return false;
-  return false;
+  return s?.getItem(COLLAPSED_KEY) === "true";
 }
+
+// ---------- game-facing store ----------
+
+export interface HudRoundView {
+  title: LangText;
+  timeLeft: number;
+  current: number;
+  total: number;
+  label?: LangText;
+  points: number;
+}
+
+export interface HudGameState {
+  score: number;
+  level: number;
+  xpInto: number;
+  xpNeed: number;
+  teamScore: number;
+  round: HudRoundView | null;
+  toast: { id: number; text: LangText } | null;
+  games: Array<{ slug: string; title: LangText }>;
+}
+
+let gameState: HudGameState = { score: 0, level: 1, xpInto: 0, xpNeed: 60, teamScore: 0, round: null, toast: null, games: [] };
+const gameListeners = new Set<() => void>();
+let toastId = 0;
+
+export function setHudGame(patch: Partial<HudGameState>): void {
+  gameState = { ...gameState, ...patch };
+  for (const l of gameListeners) l();
+}
+export function showHudToast(text: LangText): void {
+  setHudGame({ toast: { id: ++toastId, text } });
+}
+export function getHudGame(): HudGameState {
+  return gameState;
+}
+function subscribeGame(cb: () => void): () => void {
+  gameListeners.add(cb);
+  return () => {
+    gameListeners.delete(cb);
+  };
+}
+export function useHudGame(): HudGameState {
+  return useSyncExternalStore(subscribeGame, () => gameState, () => gameState);
+}
+
+// ---------- language store ----------
 
 interface HudLangState {
   lang: HudLang;
@@ -62,10 +100,6 @@ interface HudLangState {
 
 const HudLangContext = createContext<HudLangState | null>(null);
 
-/**
- * The internal provider that owns the language state. Used by <Hud /> and
- * exported so unit tests / sibling trees can read the same state.
- */
 function HudLangStore({ children, initial }: { children: ReactNode; initial?: HudLang }): JSX.Element {
   const [lang, setLangState] = useState<HudLang>(() => initial ?? readLang());
   const setLang = useCallback((l: HudLang) => {
@@ -76,23 +110,16 @@ function HudLangStore({ children, initial }: { children: ReactNode; initial?: Hu
   return <HudLangContext.Provider value={value}>{children}</HudLangContext.Provider>;
 }
 
-/** Provider for sub-trees that need to read the active lang without
- *  becoming a child of <Hud />. The initial value is taken from
- *  localStorage / navigator.language if not supplied. */
 export function HudLangProvider({ children, initial }: { children: ReactNode; initial?: HudLang }): JSX.Element {
   return <HudLangStore initial={initial}>{children}</HudLangStore>;
 }
 
-/** Active HUD language and a setter. Persists to localStorage.
- *  - When the caller is inside a <Hud /> (or <HudLangProvider />), the
- *    value is the shared state.
- *  - Outside, the hook creates its own state — useful for unit tests. */
 export function useHudLang(): HudLangState {
   const ctx = useContext(HudLangContext);
   if (ctx) return ctx;
-  // Fall back to local state when the hook is used outside a Hud tree
-  // (e.g. unit tests that probe the hook in isolation).
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [lang, setLangState] = useState<HudLang>(() => readLang());
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setLang = useCallback((l: HudLang) => {
     setLangState(l);
     safeStorage()?.setItem(LANG_KEY, l);
@@ -100,39 +127,42 @@ export function useHudLang(): HudLangState {
   return { lang, setLang };
 }
 
+// ---------- root ----------
+
 interface HudProps {
-  /** Optional content rendered under the chrome (e.g. the world embed). */
   children?: ReactNode;
+  /** Start a minigame round by slug (wired by the app shell). */
+  onAction?: (slug: string) => void;
+  /** Stop the active round. */
+  onStop?: () => void;
 }
 
-/**
- * The HUD root. Mount once near the top of the app. The HUD is just chrome:
- * score / role / level / items / notifications / avatar / leaderboard
- * placeholders, a language toggle, and a collapse-to-one-button behavior.
- */
-export function Hud({ children }: HudProps): JSX.Element {
-  // The chrome is rendered inside the lang store so the chrome and any
-  // descendants see the same state. <HudLangStore /> calls useState
-  // internally, which means the chrome is the part of the tree that
-  // *owns* the language state.
+export function Hud({ children, onAction, onStop }: HudProps): JSX.Element {
   return (
     <HudLangStore>
-      <HudShell>{children}</HudShell>
+      <HudShell onAction={onAction} onStop={onStop}>{children}</HudShell>
     </HudLangStore>
   );
 }
 
-/** Inner component that reads lang/collapsed from the store. Splitting
- *  Hud into Hud + HudShell keeps the store as the outermost element. */
-function HudShell({ children }: { children?: ReactNode }): JSX.Element {
+function HudShell({ children, onAction, onStop }: HudProps): JSX.Element {
   const [collapsed, setCollapsedState] = useState<boolean>(() => readCollapsed());
   const { lang, setLang } = useHudLang();
+  const game = useHudGame();
 
   useEffect(() => {
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = lang;
-    }
+    if (typeof document !== "undefined") document.documentElement.lang = lang;
   }, [lang]);
+
+  // Toasts clear themselves.
+  useEffect(() => {
+    if (!game.toast) return;
+    const id = game.toast.id;
+    const timer = setTimeout(() => {
+      if (getHudGame().toast?.id === id) setHudGame({ toast: null });
+    }, TOAST_MS);
+    return () => clearTimeout(timer);
+  }, [game.toast]);
 
   const setCollapsed = useCallback((c: boolean) => {
     setCollapsedState(c);
@@ -155,6 +185,12 @@ function HudShell({ children }: { children?: ReactNode }): JSX.Element {
       langEn: t("hud.lang.en", lang),
       langEs: t("hud.lang.es", lang),
       langPt: t("hud.lang.pt", lang),
+      play: t("hud.play", lang),
+      stop: t("hud.stop", lang),
+      time: t("hud.time", lang),
+      points: t("hud.points", lang),
+      xp: t("hud.xp", lang),
+      team: t("hud.team", lang),
     }),
     [lang],
   );
@@ -164,8 +200,11 @@ function HudShell({ children }: { children?: ReactNode }): JSX.Element {
       lang={lang}
       collapsed={collapsed}
       labels={labels}
+      game={game}
       onToggleCollapsed={() => setCollapsed(!collapsed)}
       onSetLang={setLang}
+      onAction={onAction}
+      onStop={onStop}
     >
       {children}
     </HudRoot>

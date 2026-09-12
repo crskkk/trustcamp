@@ -11,6 +11,11 @@ export interface WorldState {
   y: number;
   z: number;
   role: string;
+  /** Optional extras that ride along with position (leaderboard, avatar). */
+  score?: number;
+  level?: number;
+  seed?: number;
+  nick?: string;
 }
 
 export interface JoinResult {

@@ -8,9 +8,10 @@
 
 export { WorldCanvas, type WorldCanvasProps } from "./WorldCanvas";
 export type { PlayerSnapshot, RemoteInput, Quality } from "./internal/world";
+export type { PickupKind, PickupOpts } from "./internal/pickups";
 export {
   PLANET_RADIUS, WATER_LEVEL, REGIONS, TRAIL_SAMPLES, heightAt, biomeAt, surfaceRadius, isWalkable, offsetDir, angDist,
-  worldPosition, normalize, type V3, type Biome,
+  worldPosition, normalize, cross, type V3, type Biome,
 } from "./internal/planet";
 
 import type { World } from "./internal/world";

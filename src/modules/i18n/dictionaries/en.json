@@ -50,5 +50,14 @@
   "world.hint": "WASD / arrows to walk - Space to jump - E to wave (drag the stick on touch)",
   "world.move": "Move",
   "world.jump": "Jump",
-  "presence.role.prospect": "Prospect"
+  "presence.role.prospect": "Prospect",
+  "hud.play": "Play",
+  "hud.stop": "Stop round",
+  "hud.time": "Time",
+  "hud.points": "Points",
+  "hud.xp": "XP",
+  "hud.team": "Team",
+  "hud.toast.levelUp": "Level up! You reached level {n}",
+  "hud.toast.roundOver": "Round over: {p} points",
+  "hud.toast.roundTimeout": "Time is up! {p} points"
 }

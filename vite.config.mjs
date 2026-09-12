@@ -47,6 +47,15 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      // Stable names so the Artifact snapshot wrapper can reference them.
+      output: {
+        entryFileNames: "assets/[name].js",
+        chunkFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name].[ext]",
+      },
+    },
   },
   test: {
     globals: true,

@@ -1,0 +1,10 @@
+name: progress
+description: >-
+  Player progression: XP total, level curve, level-up events. Pure curve
+  functions (xpForLevel, levelFromXp) plus a small persisted store
+  (localStorage in solo mode; the server store plugs in through
+  setProgressPersistence). No PII - keyed only by the opaque player id the
+  caller supplies.
+version: 0.1.0
+api: src/modules/progress/api.ts
+depends_on: []
