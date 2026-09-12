@@ -26,7 +26,7 @@ export type Quality = "high" | "low" | "software";
 const TIER = {
   high: { ratio: 2, cap: 0, detail: 80, shadow: 2048 },
   low: { ratio: 0.6, cap: 30, detail: 48, shadow: 1024 },
-  software: { ratio: 0.4, cap: 80, detail: 36, shadow: 512 },
+  software: { ratio: 0.3, cap: 80, detail: 28, shadow: 512 },
 } as const;
 
 export interface WorldOptions {
@@ -309,10 +309,11 @@ export class World {
   private frame(now: number, first = false): void {
     // Clamp at 100 ms so a slow frame (software GL, background tab) never
     // teleports, while the low tiers' 12-30 fps still move in real time.
-    const dt = first ? 0 : Math.min(0.1, (now - this.last) / 1000);
+    const raw = first ? 0 : (now - this.last) / 1000;
+    const dt = Math.min(0.1, raw);
     this.last = now;
     this.t += dt;
-    if (dt > 0) this.fps += ((1 / dt) - this.fps) * 0.05;
+    if (raw > 0) this.fps += ((1 / raw) - this.fps) * 0.05; // real frame rate, not the clamped dt
     const p = this.player;
     const w = p.walker;
     _up.copy(w.dir);
