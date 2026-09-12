@@ -15,23 +15,14 @@ test("world canvas renders non-black frames, bridge resolves, joinWorld succeeds
   await expect(world).toBeVisible();
   await expect(world).toHaveAttribute("data-ready", "1", { timeout: 10_000 });
 
-  // Non-black frame: sample the canvas through a 2D copy (WebGL buffers are
-  // not readable after present, so draw the canvas into an offscreen 2D one).
+  // Non-black frame: the dev seam renders a frame and reads it back (a WebGL
+  // buffer is not readable after present, so the probe renders + reads).
   await expect
     .poll(
       () =>
         page.evaluate(() => {
-          const c = document.querySelector<HTMLCanvasElement>(".tc-world-canvas");
-          if (!c || c.width === 0) return 0;
-          const off = document.createElement("canvas");
-          off.width = 32;
-          off.height = 32;
-          const ctx = off.getContext("2d")!;
-          ctx.drawImage(c, 0, 0, 32, 32);
-          const d = ctx.getImageData(0, 0, 32, 32).data;
-          let bright = 0;
-          for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] > 60) bright++;
-          return bright;
+          const w = (window as unknown as { __tcWorld?: { probeFrame(): { bright: number } } }).__tcWorld;
+          return w ? w.probeFrame().bright : 0;
         }),
       { timeout: 10_000 },
     )

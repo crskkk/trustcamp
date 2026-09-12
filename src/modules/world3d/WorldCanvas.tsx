@@ -15,6 +15,29 @@ export interface WorldCanvasProps {
 
 const HINT_MS = 5000;
 
+/**
+ * Pick a quality tier: `?quality=low|high` wins; otherwise software GL
+ * (SwiftShader / llvmpipe — CI, VMs, very old machines) or a small core
+ * count drops to "low" (no shadows, coarser terrain, 1x pixel ratio).
+ */
+export function detectQuality(requested: Quality): Quality {
+  try {
+    const q = new URLSearchParams(window.location.search).get("quality");
+    if (q === "low" || q === "high" || q === "software") return q;
+    const c = document.createElement("canvas");
+    const gl = (c.getContext("webgl2") ?? c.getContext("webgl")) as WebGLRenderingContext | null;
+    if (!gl) return requested;
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const renderer = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
+    if (/swiftshader|llvmpipe|software|basic render/i.test(renderer)) return "software";
+    if (navigator.webdriver) return "software"; // automation (Playwright/CI) runs without a real GPU
+    if ((navigator.hardwareConcurrency ?? 8) <= 2) return "low";
+  } catch {
+    /* fall through */
+  }
+  return requested;
+}
+
 export function WorldCanvas({ seed = 4242, quality = "high" }: WorldCanvasProps): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const joyRef = useRef<HTMLDivElement | null>(null);
@@ -36,7 +59,7 @@ export function WorldCanvas({ seed = 4242, quality = "high" }: WorldCanvasProps)
     try {
       world = new World(canvas, {
         seed,
-        quality,
+        quality: detectQuality(quality),
         joystick: joyRef.current,
         knob: knobRef.current,
         jumpButton: jumpRef.current,

@@ -3,7 +3,7 @@
 // InstancedMesh for all placements of that kind, so 5000+ props cost ~20 draw
 // calls. Placement is deterministic (seeded) and biome-aware.
 import {
-  BufferGeometry, Color, ConeGeometry, CylinderGeometry, DodecahedronGeometry, Group, IcosahedronGeometry,
+  BufferGeometry, Color, ConeGeometry, CylinderGeometry, DodecahedronGeometry, Euler, Group, IcosahedronGeometry,
   InstancedMesh, Matrix4, Quaternion, SphereGeometry, Vector3,
 } from "three";
 import { PALETTE } from "./palette";
@@ -82,7 +82,7 @@ function buildKind(kind: Kind, group: Group): number {
     mesh.receiveShadow = true;
     const ps3 = part.scale ?? [1, 1, 1];
     const rot = part.rot ?? [0, 0, 0];
-    _pq.setFromEuler({ x: rot[0], y: rot[1], z: rot[2], order: "XYZ", isEuler: true } as never);
+    _pq.setFromEuler(new Euler(rot[0], rot[1], rot[2]));
     for (let i = 0; i < ps.length; i++) {
       const p = ps[i];
       const r = PLANET_RADIUS + p.h;

@@ -2,7 +2,7 @@
 // Owns the renderer, scene, player, remote replicas (other players and NPCs),
 // camera, lights and the animated bits (fire, flag, water, clouds).
 import {
-  ACESFilmicToneMapping, Color, Fog, PCFSoftShadowMap, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
+  ACESFilmicToneMapping, Color, Fog, PCFShadowMap, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from "three";
 import { generate } from "../../avatar/api";
 import { PALETTE } from "./palette";
@@ -20,7 +20,14 @@ import { PLANET_RADIUS, REGIONS, offsetDir, surfaceRadius, isWalkable, frameAt, 
 import { emitFrame } from "./registry";
 import { PickupLayer, type PickupKind, type PickupOpts } from "./pickups";
 
-export type Quality = "high" | "low";
+/** high: full; low: weak GPUs (no shadows, 0.6x, 30 fps); software: SwiftShader/CI (0.4x, 12 fps, coarse terrain). */
+export type Quality = "high" | "low" | "software";
+
+const TIER = {
+  high: { ratio: 2, cap: 0, detail: 80, shadow: 2048 },
+  low: { ratio: 0.6, cap: 30, detail: 48, shadow: 1024 },
+  software: { ratio: 0.4, cap: 80, detail: 36, shadow: 512 },
+} as const;
 
 export interface WorldOptions {
   seed: number;
@@ -77,6 +84,7 @@ export class World {
   readonly sky: Sky;
   readonly remotes = new Map<string, Remote>();
   readonly pickups = new PickupLayer();
+  readonly quality: Quality;
   propCount = 0;
   fps = 60;
   private player: { rig: CharacterRig; walker: WalkerState; jumpY: number; jumpVel: number; grounded: boolean; speed01: number; squash: number; emoteT: number; seed: number };
@@ -89,10 +97,12 @@ export class World {
   constructor(canvas: HTMLCanvasElement, opts: WorldOptions) {
     this.canvas = canvas;
     const quality = opts.quality ?? "high";
-    this.renderer = new WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === "high" ? 2 : 1));
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = PCFSoftShadowMap;
+    this.quality = quality;
+    const tier = TIER[quality];
+    this.renderer = new WebGLRenderer({ canvas, antialias: quality === "high", powerPreference: "high-performance" });
+    this.renderer.setPixelRatio(quality === "high" ? Math.min(window.devicePixelRatio || 1, tier.ratio) : tier.ratio);
+    this.renderer.shadowMap.enabled = quality === "high";
+    this.renderer.shadowMap.type = PCFShadowMap;
     this.renderer.toneMapping = ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
     this.renderer.outputColorSpace = SRGBColorSpace;
@@ -100,10 +110,10 @@ export class World {
     this.scene.background = new Color(PALETTE.skyHorizon);
     this.scene.fog = new Fog(PALETTE.fog, 42, 160);
 
-    this.lights = createLights(quality === "high" ? 2048 : 1024);
+    this.lights = createLights(tier.shadow);
     this.scene.add(this.lights.hemi, this.lights.sun, this.lights.sun.target);
 
-    this.scene.add(buildTerrain(quality === "high" ? 80 : 56));
+    this.scene.add(buildTerrain(tier.detail));
     const props = createProps();
     this.propCount = props.total;
     this.scene.add(props.group);
@@ -137,6 +147,11 @@ export class World {
     this.last = performance.now();
     const loop = (now: number) => {
       if (!this.running) return;
+      const cap = TIER[this.quality].cap;
+      if (cap && now - this.last < cap) {
+        this.raf = requestAnimationFrame(loop); // frame cap keeps the main thread free on weak/software GL
+        return;
+      }
       this.frame(now);
       this.raf = requestAnimationFrame(loop);
     };
@@ -148,6 +163,29 @@ export class World {
     cancelAnimationFrame(this.raf);
     this.input.detach();
     this.renderer.dispose();
+  }
+
+  /**
+   * Render one frame and read it back: how many of a 32x32 sample grid are
+   * brighter than near-black. Used by the e2e "non-black canvas" check
+   * (a WebGL buffer cannot be read after present, so we render + read here).
+   */
+  probeFrame(): { bright: number; total: number; frame: number; triangles: number } {
+    this.renderer.render(this.scene, this.chase.camera);
+    const gl = this.renderer.getContext();
+    const w = gl.drawingBufferWidth, h = gl.drawingBufferHeight;
+    const px = new Uint8Array(w * h * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    let bright = 0;
+    const N = 32;
+    for (let j = 0; j < N; j++) {
+      for (let i = 0; i < N; i++) {
+        const x = Math.floor(((i + 0.5) / N) * w), y = Math.floor(((j + 0.5) / N) * h);
+        const k = (y * w + x) * 4;
+        if (px[k] + px[k + 1] + px[k + 2] > 60) bright++;
+      }
+    }
+    return { bright, total: N * N, frame: this.renderer.info.render.frame, triangles: this.renderer.info.render.triangles };
   }
 
   resize(): void {

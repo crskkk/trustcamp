@@ -155,10 +155,7 @@ function writeHeartbeat(opts: StartPresenceOptions): void {
   }
 }
 
-function readPeerHeartbeat(key: string): PeerHeartbeat | null {
-  const s = safeStorage();
-  if (!s) return null;
-  const raw = s.getItem(key);
+function parseHeartbeat(raw: string | null | undefined): PeerHeartbeat | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as PeerHeartbeat;
@@ -167,6 +164,12 @@ function readPeerHeartbeat(key: string): PeerHeartbeat | null {
   } catch {
     return null;
   }
+}
+
+function readPeerHeartbeat(key: string): PeerHeartbeat | null {
+  const s = safeStorage();
+  if (!s) return null;
+  return parseHeartbeat(s.getItem(key));
 }
 
 function pruneStalePeers(_opts: StartPresenceOptions, _now: number): void {
@@ -219,7 +222,10 @@ export function startPresence(opts: StartPresenceOptions = {}): PresenceMap {
         }
         return;
       }
-      const peer = readPeerHeartbeat(key);
+      // Prefer the value carried by the event: every tab rewrites the shared
+      // key several times a second, so re-reading storage can miss a peer's
+      // write that was overwritten before this handler ran.
+      const peer = parseHeartbeat(evt.newValue) ?? readPeerHeartbeat(key);
       if (peer) absorbPeerHeartbeat(peer);
     };
     window.addEventListener("storage", storageHandler);

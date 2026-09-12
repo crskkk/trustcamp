@@ -5,6 +5,8 @@ import { test, expect } from "@playwright/test";
 test("start Firewood Dash from the HUD, timer counts down, stop hides the panel", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByTestId("world-canvas")).toHaveAttribute("data-ready", "1", { timeout: 15_000 });
+  // The dev-only System Status panel sits over the round panel's Stop button; dismiss it.
+  await page.getByRole("button", { name: "Dismiss" }).click();
   await page.getByTestId("hud-play-firewood-dash").click();
   const panel = page.getByTestId("hud-round");
   await expect(panel).toBeVisible();
