@@ -29,6 +29,7 @@ export interface HudLabels {
   points: string;
   xp: string;
   team: string;
+  menu: string;
 }
 
 interface HudRootProps {
@@ -40,6 +41,7 @@ interface HudRootProps {
   onSetLang: (l: HudLang) => void;
   onAction?: (slug: string) => void;
   onStop?: () => void;
+  onMenu?: (tab?: "play" | "customize" | "leaderboard" | "settings") => void;
   children?: ReactNode;
 }
 
@@ -49,7 +51,7 @@ function clock(sec: number): string {
 }
 
 export function HudRoot(props: HudRootProps): JSX.Element {
-  const { collapsed, labels, onToggleCollapsed, onSetLang, lang, children, game, onAction, onStop } = props;
+  const { collapsed, labels, onToggleCollapsed, onSetLang, lang, children, game, onAction, onStop, onMenu } = props;
   const xpPct = game.xpNeed > 0 ? Math.min(100, Math.round((game.xpInto / game.xpNeed) * 100)) : 0;
   const round = game.round;
 
@@ -92,16 +94,21 @@ export function HudRoot(props: HudRootProps): JSX.Element {
               <span className="tc-hud-row" data-testid="hud-row-notifications">
                 <span className="tc-hud-key">{labels.notifications}</span>
               </span>
-              <span className="tc-hud-row" data-testid="hud-row-avatar">
+              <span className="tc-hud-row tc-hud-row--link" data-testid="hud-row-avatar" role="link" tabIndex={0} onClick={() => onMenu?.("customize")} onKeyDown={(e) => e.key === "Enter" && onMenu?.("customize")}>
                 <span className="tc-hud-key">{labels.avatar}</span>
               </span>
-              <span className="tc-hud-row" data-testid="hud-row-leaderboard">
+              <span className="tc-hud-row tc-hud-row--link" data-testid="hud-row-leaderboard" role="link" tabIndex={0} onClick={() => onMenu?.("leaderboard")} onKeyDown={(e) => e.key === "Enter" && onMenu?.("leaderboard")}>
                 <span className="tc-hud-key">{labels.leaderboard}</span>
               </span>
             </nav>
           )}
 
           <div className="tc-hud-actions">
+            {!collapsed && onMenu && (
+              <button type="button" className="tc-hud-menu" data-testid="hud-menu" aria-label={labels.menu} onClick={() => onMenu()}>
+                {"☰"} {labels.menu}
+              </button>
+            )}
             {!collapsed && (
               <div className="tc-hud-lang" role="group" aria-label={labels.langLabel} data-testid="hud-lang">
                 {(["en", "es", "pt"] as const).map((l) => (

@@ -22,7 +22,7 @@ const HINT_MS = 5000;
  */
 export function detectQuality(requested: Quality): Quality {
   try {
-    const q = new URLSearchParams(window.location.search).get("quality");
+    const q = new URLSearchParams(window.location.search).get("quality") ?? window.localStorage.getItem("tc.quality");
     if (q === "low" || q === "high" || q === "software") return q;
     const c = document.createElement("canvas");
     const gl = (c.getContext("webgl2") ?? c.getContext("webgl")) as WebGLRenderingContext | null;

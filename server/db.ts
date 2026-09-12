@@ -47,6 +47,17 @@ CREATE TABLE IF NOT EXISTS sessions (
   created_at INTEGER NOT NULL,
   wrapped_at INTEGER
 );
+CREATE TABLE IF NOT EXISTS lti_subs (
+  sub_hash TEXT PRIMARY KEY,
+  player_id TEXT NOT NULL REFERENCES players(id)
+);
+CREATE TABLE IF NOT EXISTS session_players (
+  session_id TEXT NOT NULL REFERENCES sessions(id),
+  player_id TEXT NOT NULL REFERENCES players(id),
+  sub TEXT NOT NULL,
+  is_host INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (session_id, player_id)
+);
 `;
 
 export interface PlayerRecord {
@@ -122,6 +133,58 @@ export class Db {
   sessionScores(sessionId: string, limit = 50): Array<{ playerId: string; points: number; rounds: number; maxPoints: number }> {
     return this.db.prepare("SELECT player_id AS playerId, SUM(points) AS points, COUNT(*) AS rounds, SUM(max_points) AS maxPoints FROM rounds WHERE session_id = ? GROUP BY player_id ORDER BY points DESC LIMIT ?")
       .all(sessionId, limit) as Array<{ playerId: string; points: number; rounds: number; maxPoints: number }>;
+  }
+
+  // ---- LTI ----
+
+  /** The player bound to a platform user (hash of issuer|sub), created on first launch. */
+  playerForSub(subHash: string, seed: number, now = Date.now()): PlayerRecord {
+    const row = this.db.prepare("SELECT player_id FROM lti_subs WHERE sub_hash = ?").get(subHash) as { player_id: string } | undefined;
+    if (row) {
+      const p = this.db.prepare("SELECT id, token, seed FROM players WHERE id = ?").get(row.player_id) as { id: string; token: string; seed: number } | undefined;
+      if (p) {
+        this.touch(p.id, now);
+        const pr = this.getProgress(p.id);
+        return { id: p.id, token: p.token, seed: p.seed, xp: pr.xp, level: pr.level };
+      }
+    }
+    const created = this.getOrCreatePlayer(undefined, seed, now);
+    this.db.prepare("INSERT OR REPLACE INTO lti_subs (sub_hash, player_id) VALUES (?, ?)").run(subHash, created.id);
+    return created;
+  }
+
+  playerByToken(token: string): { id: string; seed: number } | null {
+    const p = this.db.prepare("SELECT id, seed FROM players WHERE token = ?").get(token) as { id: string; seed: number } | undefined;
+    return p ?? null;
+  }
+
+  upsertSession(id: string, contextId: string | null, lineitemUrl: string | null, now = Date.now()): void {
+    this.db.prepare("INSERT INTO sessions (id, context_id, lineitem_url, created_at) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET context_id = COALESCE(excluded.context_id, sessions.context_id), lineitem_url = COALESCE(excluded.lineitem_url, sessions.lineitem_url)")
+      .run(id, contextId, lineitemUrl, now);
+  }
+
+  getSession(id: string): { id: string; context_id: string | null; lineitem_url: string | null; wrapped_at: number | null } | null {
+    const s = this.db.prepare("SELECT id, context_id, lineitem_url, wrapped_at FROM sessions WHERE id = ?").get(id) as { id: string; context_id: string | null; lineitem_url: string | null; wrapped_at: number | null } | undefined;
+    return s ?? null;
+  }
+
+  linkSessionPlayer(sessionId: string, playerId: string, sub: string, isHost: boolean): void {
+    this.db.prepare("INSERT INTO session_players (session_id, player_id, sub, is_host) VALUES (?, ?, ?, ?) ON CONFLICT(session_id, player_id) DO UPDATE SET sub = excluded.sub, is_host = MAX(session_players.is_host, excluded.is_host)")
+      .run(sessionId, playerId, sub, isHost ? 1 : 0);
+  }
+
+  sessionPlayers(sessionId: string): Array<{ playerId: string; sub: string; isHost: boolean }> {
+    return (this.db.prepare("SELECT player_id AS playerId, sub, is_host AS isHost FROM session_players WHERE session_id = ?").all(sessionId) as Array<{ playerId: string; sub: string; isHost: number }>)
+      .map((r) => ({ playerId: r.playerId, sub: r.sub, isHost: r.isHost === 1 }));
+  }
+
+  isHost(sessionId: string, playerId: string): boolean {
+    const r = this.db.prepare("SELECT is_host FROM session_players WHERE session_id = ? AND player_id = ?").get(sessionId, playerId) as { is_host: number } | undefined;
+    return r?.is_host === 1;
+  }
+
+  markWrapped(sessionId: string, now = Date.now()): void {
+    this.db.prepare("UPDATE sessions SET wrapped_at = ? WHERE id = ?").run(now, sessionId);
   }
 
   playerCount(): number {

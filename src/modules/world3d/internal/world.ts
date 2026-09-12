@@ -226,6 +226,16 @@ export class World {
     return angDist({ x: d.x, y: d.y, z: d.z }, { x: pos.x / m, y: pos.y / m, z: pos.z / m }) * PLANET_RADIUS;
   }
 
+  /** Trigger a jump / wave from UI (same effect as the keys). */
+  jump(): void {
+    this.input.inject(null);
+    this.pendingJump = true;
+  }
+  wave(): void {
+    this.player.emoteT = 1.6;
+  }
+  private pendingJump = false;
+
   /** Move the player to a unit direction (spawn points, dev/e2e vantage checks). */
   teleport(d: V3, facing?: V3): void {
     const w = this.player.walker;
@@ -327,7 +337,9 @@ export class World {
     } else {
       p.speed01 += (0 - p.speed01) * Math.min(1, 10 * dt);
     }
-    if (this.input.consumeJump() && p.grounded) {
+    const jumpNow = this.input.consumeJump() || this.pendingJump;
+    this.pendingJump = false;
+    if (jumpNow && p.grounded) {
       p.jumpVel = 6.2;
       p.grounded = false;
     }

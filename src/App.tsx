@@ -15,6 +15,8 @@ import * as bridgeApi from "./modules/bridge/api";
 import { registerDefaults, list as listGames, startRound, endRound, startPassive, attachFrameDriver, subscribe as subscribeRounds, type RoundState } from "./modules/minigames/api";
 import { getProgress, grantXp, subscribeProgress, setProgressPersistence } from "./modules/progress/api";
 import { setSelf, addSelfScore, setSelfLevel, selfPublish, startLeaderboard, subscribeLeaderboard, nickFor } from "./modules/leaderboard/api";
+import { Menu, toggleMenu, setMenuIdentity } from "./modules/menu/api";
+import { readLaunchFromHash } from "./modules/lti/api";
 
 export function App() {
   if (typeof window !== "undefined" && window.location.pathname === "/screensaver") {
@@ -23,9 +25,14 @@ export function App() {
   return (
     <div className="tc-app">
       <Bootstrap />
-      <Hud onAction={(slug) => startRound(slug, { playerId: playerIdRef.id, sessionId: SESSION_ID, role: "scout" })} onStop={() => endRound("stopped")}>
+      <Hud
+        onAction={(slug) => startRound(slug, { playerId: playerIdRef.id, sessionId: SESSION_ID, role: "scout" })}
+        onStop={() => endRound("stopped")}
+        onMenu={(tab) => toggleMenu(tab)}
+      >
         <AppSubtitle />
         <WorldCanvas seed={PLAYER_SEED} />
+        <Menu onSeed={(seed) => setSelf({ playerId: playerIdRef.id, seed, level: getProgress().level })} />
       </Hud>
       {import.meta.env.DEV && (
         <>
@@ -43,7 +50,31 @@ const SELF_ID: string =
   (typeof window !== "undefined" &&
     (window.crypto?.randomUUID?.() ?? "self-" + Math.random().toString(36).slice(2, 12))) ||
   "self";
-const SESSION_ID = "solo";
+/**
+ * An LTI launch lands here with credentials in the URL hash: persist them,
+ * strip the hash, and from then on the session/server/host come from storage.
+ */
+const LAUNCH = (() => {
+  try {
+    const l = readLaunchFromHash();
+    if (!l) return null;
+    window.localStorage.setItem("tc.token", l.token);
+    window.localStorage.setItem("tc.session", l.session);
+    window.localStorage.setItem("tc.host", l.host ? "1" : "0");
+    if (l.ws) window.localStorage.setItem("tc.ws", l.ws);
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    return l;
+  } catch {
+    return null;
+  }
+})();
+const SESSION_ID: string = (() => {
+  try { return window.localStorage.getItem("tc.session") || "solo"; } catch { return "solo"; }
+})();
+const IS_HOST: boolean = (() => {
+  try { return window.localStorage.getItem("tc.host") === "1"; } catch { return false; }
+})();
+void LAUNCH;
 /** The id the server assigned us (ws) or SELF_ID (solo). Set after joinWorld. */
 const playerIdRef = { id: SELF_ID };
 
@@ -117,6 +148,7 @@ function Bootstrap(): null {
         id = join.sessionId;
         playerIdRef.id = id;
         setSelf({ playerId: id, seed: PLAYER_SEED });
+        setMenuIdentity({ playerId: id });
         // Progress lives on the server for this player; XP writes go straight there.
         setProgressPersistence({ load: () => join.progress ?? null, save: (s) => sendProgress(s.xp) });
         unsubs.push(bridgeOnLeave((playerId) => removePeer(playerId)));
@@ -154,6 +186,7 @@ function Bootstrap(): null {
     })();
 
     // --- game systems (need the 3D world for pickups; wait for it to mount) ---
+    setMenuIdentity({ playerId: id, sessionId: SESSION_ID, host: IS_HOST });
     registerDefaults();
     setSelf({ playerId: id, seed: PLAYER_SEED, level: getProgress().level });
     startLeaderboard();

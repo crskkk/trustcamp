@@ -12,6 +12,7 @@ import { WebSocketServer, type WebSocket } from "ws";
 import { Db } from "./db";
 import { Rooms, TICK_MS } from "./rooms";
 import { decodeClient, encode, PROTOCOL_VERSION } from "./protocol";
+import { Lti, ltiConfigFromEnv, type LtiConfig, type LtiDeps } from "./lti";
 
 const PORT = Number(process.env.PORT ?? 8787);
 const DB_PATH = process.env.DB_PATH ?? "data/thebar.sqlite";
@@ -22,20 +23,77 @@ export interface ServerHandle {
   close(): Promise<void>;
 }
 
-export function startServer(opts: { port?: number; dbPath?: string; log?: (s: string) => void } = {}): Promise<ServerHandle> {
+function readBody(req: IncomingMessage, limit = 64 * 1024): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let data = "";
+    req.on("data", (c: Buffer) => { data += c.toString(); if (data.length > limit) { reject(new Error("body too large")); req.destroy(); } });
+    req.on("end", () => resolve(data));
+    req.on("error", reject);
+  });
+}
+
+function json(res: ServerResponse, status: number, body: unknown): void {
+  res.statusCode = status;
+  res.setHeader("Content-Type", "application/json");
+  res.end(JSON.stringify(body));
+}
+
+export async function startServer(opts: { port?: number; dbPath?: string; log?: (s: string) => void; lti?: LtiConfig | null; ltiDeps?: LtiDeps } = {}): Promise<ServerHandle> {
   const port = opts.port ?? PORT;
   const log = opts.log ?? ((s: string) => console.log(s));
   const db = new Db(opts.dbPath ?? DB_PATH);
   const rooms = new Rooms();
+  const ltiCfg = opts.lti === undefined ? ltiConfigFromEnv() : opts.lti;
+  const lti = ltiCfg ? new Lti(ltiCfg, db, opts.ltiDeps) : null;
+  if (lti) await lti.init();
+
+  const handleLti = async (req: IncomingMessage, res: ServerResponse, path: string): Promise<void> => {
+    if (!lti) return json(res, 404, { error: "LTI not configured (set LTI_ISSUER, LTI_CLIENT_ID, ...)" });
+    try {
+      if (path === "/lti/jwks" && req.method === "GET") return json(res, 200, lti.jwks());
+      if (path === "/lti/config" && req.method === "GET") return json(res, 200, lti.toolConfig());
+      if (path === "/lti/login") {
+        const q = req.method === "POST" ? Object.fromEntries(new URLSearchParams(await readBody(req))) : Object.fromEntries(new URL(req.url ?? "/", "http://x").searchParams);
+        res.statusCode = 302;
+        res.setHeader("Location", lti.login(q));
+        return res.end();
+      }
+      if (path === "/lti/launch" && req.method === "POST") {
+        const form = Object.fromEntries(new URLSearchParams(await readBody(req)));
+        const out = await lti.launch(form);
+        log(`[lti] launch session=${out.sessionId} player=${out.playerId} host=${out.host}`);
+        res.statusCode = 302;
+        res.setHeader("Location", out.redirect);
+        return res.end();
+      }
+      if (path === "/lti/wrap" && req.method === "POST") {
+        const body = JSON.parse((await readBody(req)) || "{}") as { sessionId?: string; token?: string };
+        if (!body.sessionId || !body.token) return json(res, 400, { error: "sessionId and token required" });
+        const out = await lti.wrap(body.sessionId, body.token);
+        log(`[lti] wrap session=${body.sessionId} pushed=${out.pushed} skipped=${out.skipped}`);
+        return json(res, 200, out);
+      }
+      return json(res, 404, { error: "not found" });
+    } catch (e) {
+      const msg = (e as Error).message;
+      log(`[lti] error ${path}: ${msg}`);
+      return json(res, 400, { error: msg });
+    }
+  };
 
   const http = createServer((req: IncomingMessage, res: ServerResponse) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    if (req.url === "/health") {
+    res.setHeader("Access-Control-Allow-Headers", "content-type");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    if (req.method === "OPTIONS") { res.statusCode = 204; return res.end(); }
+    const path = (req.url ?? "/").split("?")[0];
+    if (path === "/health") {
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ ok: true, protocol: PROTOCOL_VERSION, players: db.playerCount(), online: rooms.members.size }));
+      res.end(JSON.stringify({ ok: true, protocol: PROTOCOL_VERSION, players: db.playerCount(), online: rooms.members.size, lti: !!lti }));
       return;
     }
-    if (req.url === "/debug" && process.env.NODE_ENV !== "production") {
+    if (path.startsWith("/lti/")) { void handleLti(req, res, path); return; }
+    if (path === "/debug" && process.env.NODE_ENV !== "production") {
       res.setHeader("Content-Type", "application/json");
       res.end(JSON.stringify({ members: rooms.snapshot(), sockets: wss.clients.size }));
       return;

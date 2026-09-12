@@ -41,6 +41,12 @@
 - **depends_on:** —
 - **description:** LTI 1.3 Phase C scaffold: OIDC login handler, JWT validation, and session token emit with privacy-first design. Only the opaque 'sub' claim is used; no PII (name, email, etc.) is ever requested or stored.
 
+### menu `0.1.0`
+
+- **api:** `src/modules/menu/api.tsx`
+- **depends_on:** hud, i18n, world3d, avatar, minigames, leaderboard, progress, bridge, lti
+- **description:** The collapsible in-game menu: a side drawer with four tabs - Play (start / stop Camp Games rounds, jump, wave, walk to an area), Customize (your camper: re-roll, quick picks), Leaderboard (live rows + team score) and Settings (language, graphics tier, multiplayer server, connection status, host-only "wrap session and push grades"). Opens from the HUD menu button and from the Avatar / Leaderboard rows; closes with Escape or the X. All strings come from the i18n dictionaries.
+
 ### minigames `0.1.0`
 
 - **api:** `src/modules/minigames/api.ts`

@@ -15,8 +15,27 @@ export {
 } from "./internal/planet";
 
 import type { World } from "./internal/world";
+import type { AvatarSpec } from "../avatar/api";
 import { getCurrentWorld, addFrameListener } from "./internal/registry";
-import { TRAIL_SAMPLES, TRAIL_STEP, PLANET_RADIUS, slerp, cross, normalize, worldPosition, type V3 } from "./internal/planet";
+import { REGIONS, TRAIL_SAMPLES, TRAIL_STEP, PLANET_RADIUS, slerp, cross, normalize, offsetDir, worldPosition, type V3 } from "./internal/planet";
+import { SKIN, HAIR, EYES, OUTFIT } from "./internal/palette";
+
+export type Area = "camp" | "lake" | "forest" | "hills";
+
+/** A walkable spot to arrive at in each area (the lake one is the dock shore). */
+export function landmark(area: Area): V3 {
+  switch (area) {
+    case "camp": return offsetDir(REGIONS.camp, 0.5, -3.2);
+    case "lake": return slerp(REGIONS.lake, REGIONS.camp, 0.19);
+    case "forest": return REGIONS.forest;
+    case "hills": return slerp(REGIONS.hills, REGIONS.forest, 0.12);
+  }
+}
+
+/** The colours a spec renders with (for menus/previews; no Three.js needed). */
+export function avatarColors(spec: AvatarSpec): { skin: number; hair: number; eyes: number; outfit: number } {
+  return { skin: SKIN[spec.skinTone % SKIN.length], hair: HAIR[spec.hairColor % HAIR.length], eyes: EYES[spec.eyeColor % EYES.length], outfit: OUTFIT[spec.bodyAccent % OUTFIT.length] };
+}
 
 /** The mounted world, or null before <WorldCanvas/> mounts (and in jsdom). */
 export function getWorld(): World | null {

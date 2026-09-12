@@ -129,23 +129,27 @@ export function useHudLang(): HudLangState {
 
 // ---------- root ----------
 
+export type HudMenuTab = "play" | "customize" | "leaderboard" | "settings";
+
 interface HudProps {
   children?: ReactNode;
   /** Start a minigame round by slug (wired by the app shell). */
   onAction?: (slug: string) => void;
   /** Stop the active round. */
   onStop?: () => void;
+  /** Open the menu drawer (menu button, Avatar / Leaderboard rows). */
+  onMenu?: (tab?: HudMenuTab) => void;
 }
 
-export function Hud({ children, onAction, onStop }: HudProps): JSX.Element {
+export function Hud({ children, onAction, onStop, onMenu }: HudProps): JSX.Element {
   return (
     <HudLangStore>
-      <HudShell onAction={onAction} onStop={onStop}>{children}</HudShell>
+      <HudShell onAction={onAction} onStop={onStop} onMenu={onMenu}>{children}</HudShell>
     </HudLangStore>
   );
 }
 
-function HudShell({ children, onAction, onStop }: HudProps): JSX.Element {
+function HudShell({ children, onAction, onStop, onMenu }: HudProps): JSX.Element {
   const [collapsed, setCollapsedState] = useState<boolean>(() => readCollapsed());
   const { lang, setLang } = useHudLang();
   const game = useHudGame();
@@ -191,6 +195,7 @@ function HudShell({ children, onAction, onStop }: HudProps): JSX.Element {
       points: t("hud.points", lang),
       xp: t("hud.xp", lang),
       team: t("hud.team", lang),
+      menu: t("hud.menu", lang),
     }),
     [lang],
   );
@@ -205,6 +210,7 @@ function HudShell({ children, onAction, onStop }: HudProps): JSX.Element {
       onSetLang={setLang}
       onAction={onAction}
       onStop={onStop}
+      onMenu={onMenu}
     >
       {children}
     </HudRoot>
