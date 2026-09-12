@@ -120,5 +120,57 @@ it fails.
 
 ---
 
+---
+
+## THE BAR (v2.x) — Three.js world, Camp Games, multiplayer, menu, LTI
+
+**T-11 World walk (v2.0)**
+1. `pnpm dev`, open `http://127.0.0.1:5173/`. The campground renders within 10 s
+   (lodge with porch, three cabins, tents, campfire with embers, benches, lanterns).
+2. WASD/arrows walk, Space jumps (landing squash), E waves; on touch, drag the
+   left stick and tap the jump button. The control hint fades ≤ 5 s after input.
+3. Follow the dirt trail out of either gate: lake with dock and foam shoreline
+   (≈ 30 s), forest with rounded canopy trees and pines, terraced hills with
+   rock faces. A full lap along the trail loop takes < 60 s at run speed.
+4. Expected: ≥ 30 fps at 1280×720 on an integrated GPU (`__tcWorld.fps` in dev),
+   no console errors. Automated: `e2e/embed-smoke.spec.ts`, `walker.spec.ts`,
+   `planet.spec.ts`.
+
+**T-12 Camp Games (v2.1)**
+1. Menu → Play → **Firewood Dash**: 8 logs lie along the trails near camp; walk
+   into up to 3, return to the campfire; the round panel shows time, logs
+   delivered, points, team score. Deliver all 8 (or let the 60 s run out).
+2. **Lantern Relay**: six unlit lanterns lead toward the lake; light them in
+   order (a wrong one shows a hint); finishing early adds a time bonus.
+3. Pinecones/berries on the trails give +3 XP; the level chip and XP bar move;
+   a level-up toast appears at 60 XP. Reload: level and XP persist.
+4. Automated: `minigames.spec.ts`, `progress.spec.ts`, `e2e/minigame.spec.ts`.
+
+**T-13 Live multiplayer (v2.2)**
+1. `pnpm server` (second terminal). Open two *different* browsers (or one
+   normal + one private window) at `http://127.0.0.1:5173/?ws=ws://127.0.0.1:8787`.
+2. Each sees the other's camper within a second; movement follows with
+   < 150 ms visible lag on a LAN; scores/levels appear in Menu → Leaderboard
+   with a live team total. Close one window: its camper disappears at once.
+3. Reload a window: same camper, same XP (resume token in localStorage;
+   progress on the server). `GET /health` shows `online`.
+4. Automated: `server/server.spec.ts`, `e2e/multiplayer.spec.ts`.
+
+**T-14 Menu (v2.3)**
+1. HUD → **Menu** (or click Avatar / Leaderboard in the bar). Tabs: Play,
+   Customize, Leaderboard, Settings. Escape or ✕ closes.
+2. Customize → *New random look* changes the camper immediately and persists
+   across reloads; *Wear* applies a quick pick.
+3. Settings → language switches the whole chrome; Graphics reloads into the
+   chosen tier; Multiplayer server connects/disconnects; Connection shows
+   *Solo* or *Online (server)*.
+4. Automated: `menu.spec.tsx`, `e2e/hud-skeleton.spec.ts`.
+
+**T-9 (updated) Moodle gradebook** — follow `docs/MOODLE.md` (needs the server on
+an https host). Mock-platform coverage: `server/lti.spec.ts` (login → launch →
+learner join → host wrap → AGS score POST with the opaque `sub` only).
+
+---
+
 **Writing new scripts:** a feature owns its T-script. Add the next number.
 Milestone audits run *all their scripts* before gate check.

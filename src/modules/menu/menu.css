@@ -31,7 +31,8 @@
   gap: 8px;
   padding: 10px 10px 0 12px;
 }
-.tc-menu-tabs { display: flex; gap: 4px; flex: 1 1 auto; overflow-x: auto; }
+.tc-menu-tabs { display: flex; gap: 4px; flex: 1 1 auto; overflow-x: auto; scrollbar-width: none; }
+.tc-menu-tabs::-webkit-scrollbar { display: none; }
 .tc-menu-tab {
   border: 0;
   background: transparent;
