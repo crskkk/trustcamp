@@ -37,6 +37,8 @@ function serveRootArtifacts() {
 }
 
 export default defineConfig({
+  // Pages serves the client under /trustcamp/; local dev and Artifact snapshots use "/".
+  base: process.env.VITE_BASE ?? "/",
   plugins: [react(), serveRootArtifacts()],
   server: {
     host: "127.0.0.1",
