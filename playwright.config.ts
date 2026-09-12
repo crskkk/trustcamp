@@ -19,10 +19,8 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: {
-    command: "pnpm dev",
-    url: "http://127.0.0.1:5173",
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
-  },
+  webServer: [
+    { command: "pnpm dev", url: "http://127.0.0.1:5173", reuseExistingServer: !process.env.CI, timeout: 60_000 },
+    { command: "pnpm server", url: "http://127.0.0.1:8787/health", reuseExistingServer: !process.env.CI, timeout: 30_000, env: { DB_PATH: ":memory:" } },
+  ],
 });

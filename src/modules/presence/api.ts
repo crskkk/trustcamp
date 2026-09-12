@@ -192,7 +192,10 @@ export function startPresence(opts: StartPresenceOptions = {}): PresenceMap {
   // 1) Subscribe to the bridge — the real source of truth when Supabase is
   //    configured; in-memory fallback otherwise (single-tab; harmless).
   bridgeUnsub = onState((raw: WorldState) => {
-    if (selfId && raw.playerId === selfId) return;
+    // The self id can change after a networked join (server-assigned id), so
+    // read the live option rather than the value captured at first start.
+    const me = currentOpts?.selfId ?? selfId;
+    if (me && raw.playerId === me) return;
     const remote = inject(raw);
     if (!remote) return;
     const had = map.has(remote.playerId);

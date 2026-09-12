@@ -4,14 +4,17 @@ import { useHudLang, Hud, setHudGame, showHudToast, type LangText } from "./modu
 import { StatusPanel } from "./modules/statuspanel/StatusPanel";
 import { WorldCanvas, getWorld, npcWanderBy } from "./modules/world3d/api";
 import { startOrbit, stopOrbit } from "./modules/screensaver/api";
-import { PresenceOverlay, startPresence, subscribePresence } from "./modules/presence/api";
-import { joinWorld as bridgeJoinWorld, sendState as bridgeSendState, onState as bridgeOnState, mountBridge } from "./modules/bridge/api";
+import { PresenceOverlay, startPresence, subscribePresence, removePeer } from "./modules/presence/api";
+import {
+  joinWorld as bridgeJoinWorld, leaveWorld, sendState as bridgeSendState, onState as bridgeOnState, onLeave as bridgeOnLeave,
+  configureWs, getTransport, sendRound, sendProgress, mountBridge,
+} from "./modules/bridge/api";
 import { spawnNpc, clearNpcs, listNpcs, setNpcCap } from "./modules/npc/api";
 import { startNpcMotion, stopNpcMotion } from "./modules/npc/bridge";
 import * as bridgeApi from "./modules/bridge/api";
 import { registerDefaults, list as listGames, startRound, endRound, startPassive, attachFrameDriver, subscribe as subscribeRounds, type RoundState } from "./modules/minigames/api";
-import { getProgress, grantXp, subscribeProgress } from "./modules/progress/api";
-import { setSelf, addSelfScore, setSelfLevel, selfPublish, startLeaderboard, subscribeLeaderboard } from "./modules/leaderboard/api";
+import { getProgress, grantXp, subscribeProgress, setProgressPersistence } from "./modules/progress/api";
+import { setSelf, addSelfScore, setSelfLevel, selfPublish, startLeaderboard, subscribeLeaderboard, nickFor } from "./modules/leaderboard/api";
 
 export function App() {
   if (typeof window !== "undefined" && window.location.pathname === "/screensaver") {
@@ -20,7 +23,7 @@ export function App() {
   return (
     <div className="tc-app">
       <Bootstrap />
-      <Hud onAction={(slug) => startRound(slug, { playerId: SELF_ID, sessionId: SESSION_ID, role: "scout" })} onStop={() => endRound("stopped")}>
+      <Hud onAction={(slug) => startRound(slug, { playerId: playerIdRef.id, sessionId: SESSION_ID, role: "scout" })} onStop={() => endRound("stopped")}>
         <AppSubtitle />
         <WorldCanvas seed={PLAYER_SEED} />
       </Hud>
@@ -41,6 +44,24 @@ const SELF_ID: string =
     (window.crypto?.randomUUID?.() ?? "self-" + Math.random().toString(36).slice(2, 12))) ||
   "self";
 const SESSION_ID = "solo";
+/** The id the server assigned us (ws) or SELF_ID (solo). Set after joinWorld. */
+const playerIdRef = { id: SELF_ID };
+
+/** Server URL: build-time VITE_WS_URL, then ?ws=, then a remembered choice. Empty = solo. */
+function resolveWsUrl(): string | null {
+  try {
+    const env = (import.meta.env.VITE_WS_URL as string | undefined) ?? "";
+    const param = new URLSearchParams(window.location.search).get("ws");
+    if (param !== null) {
+      if (param === "" || param === "off") { window.localStorage.removeItem("tc.ws"); return null; }
+      window.localStorage.setItem("tc.ws", param);
+      return param;
+    }
+    return window.localStorage.getItem("tc.ws") || env || null;
+  } catch {
+    return null;
+  }
+}
 
 const SEED_KEY = "tc.avatar.seed";
 
@@ -85,12 +106,21 @@ function Bootstrap(): null {
     const timers: ReturnType<typeof setInterval>[] = [];
     const unsubs: Array<() => void> = [];
     mountBridge(window); // host-console / e2e seam: window.__tcBridge
-    const id = SELF_ID;
+    configureWs(resolveWsUrl());
+    let id = SELF_ID;
     const seeds = new Map<string, number>();
 
     (async () => {
-      await bridgeJoinWorld();
-      if (stopped) return;
+      const join = await bridgeJoinWorld({ seed: PLAYER_SEED, nick: nickFor(PLAYER_SEED) });
+      if (stopped || !join.ok) return;
+      if (getTransport() === "ws") {
+        id = join.sessionId;
+        playerIdRef.id = id;
+        setSelf({ playerId: id, seed: PLAYER_SEED });
+        // Progress lives on the server for this player; XP writes go straight there.
+        setProgressPersistence({ load: () => join.progress ?? null, save: (s) => sendProgress(s.xp) });
+        unsubs.push(bridgeOnLeave((playerId) => removePeer(playerId)));
+      }
       startPresence({ selfId: id, role: "scout" });
       unsubs.push(bridgeOnState((s) => {
         if (typeof s.seed === "number") seeds.set(s.playerId, s.seed);
@@ -160,6 +190,7 @@ function Bootstrap(): null {
         case "end":
           setHudGame({ round: null });
           if (e.envelope) {
+            sendRound(e.envelope); // persisted by the server (no-op in solo mode)
             grantXp(e.envelope.points);
             addSelfScore(e.envelope.points);
             showHudToast(fmt(e.reason === "timeout" ? "hud.toast.roundTimeout" : "hud.toast.roundOver", { p: String(e.envelope.points) }));
@@ -181,6 +212,7 @@ function Bootstrap(): null {
       for (const u of unsubs) u();
       endRound("stopped");
       stopNpcMotion();
+      void leaveWorld();
     };
   }, []);
   return null;

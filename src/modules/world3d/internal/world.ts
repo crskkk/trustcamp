@@ -297,7 +297,9 @@ export class World {
   }
 
   private frame(now: number, first = false): void {
-    const dt = first ? 0 : Math.min(0.05, (now - this.last) / 1000);
+    // Clamp at 100 ms so a slow frame (software GL, background tab) never
+    // teleports, while the low tiers' 12-30 fps still move in real time.
+    const dt = first ? 0 : Math.min(0.1, (now - this.last) / 1000);
     this.last = now;
     this.t += dt;
     if (dt > 0) this.fps += ((1 / dt) - this.fps) * 0.05;

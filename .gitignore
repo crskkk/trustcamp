@@ -8,3 +8,6 @@ test-results/
 .vite/
 *.code-workspace
 
+
+# server SQLite (session persistence)
+/data/

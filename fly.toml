@@ -1,0 +1,30 @@
+# Fly.io config for the THE BAR server. First time:
+#   fly launch --no-deploy --copy-config --name thebar-server
+#   fly volumes create thebar_data --size 1
+#   fly deploy
+# Then point the client at it: https://crskkk.github.io/trustcamp/?ws=wss://thebar-server.fly.dev
+app = "thebar-server"
+primary_region = "iad"
+
+[build]
+  dockerfile = "server/Dockerfile"
+
+[env]
+  PORT = "8787"
+  DB_PATH = "/app/data/thebar.sqlite"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[mounts]]
+  source = "thebar_data"
+  destination = "/app/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

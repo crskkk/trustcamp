@@ -10,6 +10,15 @@
       ],
       "port": 5173,
       "autoPort": false
+    },
+    {
+      "name": "server",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "server"
+      ],
+      "port": 8787,
+      "autoPort": false
     }
   ]
 }

@@ -63,6 +63,6 @@ export default defineConfig({
     setupFiles: ["./src/test-setup.ts"],
     reporters: ["default", "json"],
     outputFile: "test-results.json",
-    include: ["src/**/*.{test,spec}.{ts,tsx}", "workers/**/*.{test,spec}.ts"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}", "workers/**/*.{test,spec}.ts", "server/**/*.spec.ts"],
   },
 });

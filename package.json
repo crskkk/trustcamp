@@ -15,7 +15,9 @@
     "i18n:check": "tsx workers/i18n-check/index.ts",
     "system:update": "tsx workers/system-update/index.ts",
     "bundle:guard": "tsx workers/bundle-guard/index.ts",
-    "balance:sim": "echo \"balance:sim is a stub (real impl in a later task)\" && exit 0"
+    "balance:sim": "echo \"balance:sim is a stub (real impl in a later task)\" && exit 0",
+    "server": "tsx server/index.ts",
+    "server:dev": "tsx watch server/index.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

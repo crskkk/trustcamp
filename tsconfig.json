@@ -18,6 +18,6 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src", "workers", "vite.config.ts", "playwright.config.ts"],
+  "include": ["src", "workers", "server", "vite.config.ts", "playwright.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
