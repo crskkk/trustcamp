@@ -1,6 +1,6 @@
 {
-  "app.title": "TrustCamp",
-  "app.subtitle": "Um mundo de acampamento num mini-planeta. Em construção.",
+  "app.title": "THE BAR",
+  "app.subtitle": "THE BAR - um acampamento em um mini-planeta. Ande, jogue, suba de nível.",
   "unity.placeholder": "O mundo Unity monta aqui (tarefa 0002+)",
   "world.title": "Mundo de TrustCamp",
   "world.loading": "Carregando mundo…",
@@ -24,7 +24,7 @@
   "status.ok": "ok",
   "status.fail": "falhou",
   "status.running": "executando…",
-  "hud.title": "TrustCamp",
+  "hud.title": "THE BAR",
   "hud.collapse": "Recolher HUD",
   "hud.expand": "Expandir HUD",
   "hud.score": "Pontuação",

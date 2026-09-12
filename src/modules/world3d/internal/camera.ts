@@ -41,7 +41,7 @@ export class ChaseCamera {
       this.initialised = false;
       return;
     }
-    _desired.copy(feet).addScaledVector(up, 3.4).addScaledVector(fwd, -6.0); // 3/4 diorama angle
+    _desired.copy(feet).addScaledVector(up, 2.9).addScaledVector(fwd, -6.2); // ~19° down: the camper's back, not its crown
     if (!this.initialised) {
       this.pos.copy(_desired);
       this.initialised = true;
@@ -54,7 +54,7 @@ export class ChaseCamera {
     if (this.pos.length() < minR) this.pos.setLength(minR);
     this.camera.position.copy(this.pos);
     this.camera.up.copy(up);
-    _look.copy(feet).addScaledVector(up, 0.8);
+    _look.copy(feet).addScaledVector(up, 1.1);
     this.camera.lookAt(_look);
   }
 }

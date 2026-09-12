@@ -60,7 +60,7 @@ export function buildTerrain(detail = 80): Mesh {
     if (fm > 0) col.lerp(cGD, fm * 0.25);
     if (hm > 0) col.lerp(cMeadow, hm * 0.35);
     if (hm > 0 && h > 3.6) col.lerp(v > 0 ? cRock : cRockD, smoothstep(3.6, 4.6, h));
-    if (dh > 0.42) col.lerp(v > 0 ? cRock : cRockD, smoothstep(0.42, 0.7, dh));
+    if (dh > 0.6) col.lerp(v > 0 ? cRock : cRockD, smoothstep(0.6, 0.95, dh)); // only true cliff faces go bare
     if (h > 5.2) col.lerp(cSnow, smoothstep(5.2, 6.0, h));
     if (lm > 0) {
       if (h < WATER_LEVEL - 0.35) col.lerp(cLakebed, 0.9);

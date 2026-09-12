@@ -8,7 +8,7 @@ import { PLANET_RADIUS, WATER_LEVEL, REGIONS, heightAt, offsetDir } from "./plan
 
 const RINGS = 44;
 const SEGS = 96;
-const RADIUS_M = 17.5;
+const RADIUS_M = 28; // wider than the basin so the shoreline is the terrain, never the disc edge
 
 function buildDisc(): BufferGeometry {
   const positions: number[] = [];
@@ -70,7 +70,7 @@ uniform vec3 uFoam;
 varying float vDepth;
 varying vec3 vWorld;
 void main() {
-  float d = clamp(vDepth / 1.6, 0.0, 1.0);
+  float d = clamp(vDepth / 2.6, 0.0, 1.0);
   vec3 c = mix(uShallow, uDeep, smoothstep(0.05, 1.0, d));
   float r1 = sin((vWorld.x * 1.9 + vWorld.z * 1.3 + vWorld.y * 0.7) * 1.6 + uTime * 1.4);
   float r2 = sin((vWorld.x * 0.7 - vWorld.z * 2.1 + vWorld.y * 1.3) * 1.9 - uTime * 1.0);

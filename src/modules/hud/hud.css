@@ -9,7 +9,7 @@
   left: 0;
   right: 0;
   z-index: 20;
-  background: rgba(58, 44, 32, 0.6);
+  background: rgba(250, 240, 214, 0.82);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: #f4f4f6;
@@ -169,7 +169,7 @@
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(59, 47, 34, 0.7);
 }
 .tc-hud-play-btn {
   pointer-events: auto;
@@ -194,11 +194,11 @@
   border-radius: 14px;
   background: rgba(58, 44, 32, 0.78);
   backdrop-filter: blur(8px);
-  color: #fff7e6;
+  color: #3b2f22;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
-.tc-round-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; color: #ffe08a; }
+.tc-round-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; color: #b5441f; }
 .tc-round-grid {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -206,22 +206,22 @@
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
-.tc-round-key { color: rgba(255, 255, 255, 0.7); }
+.tc-round-key { color: rgba(59, 47, 34, 0.65); }
 .tc-round-time { font-weight: 700; font-size: 20px; line-height: 1; }
-.tc-round-time.is-low { color: #ff8a80; }
+.tc-round-time.is-low { color: #c62828; }
 .tc-round-progress, .tc-round-points, .tc-round-team { font-weight: 600; text-align: right; }
 .tc-round-stop {
   margin-top: 10px;
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(120, 90, 60, 0.3);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.6);
   color: inherit;
   font-size: 12px;
   padding: 5px 8px;
   cursor: pointer;
 }
-.tc-round-stop:hover, .tc-round-stop:focus-visible { background: rgba(255, 255, 255, 0.18); outline: 2px solid #5fa8ff; }
+.tc-round-stop:hover, .tc-round-stop:focus-visible { background: #fff; outline: 2px solid #f2b64f; }
 
 .tc-toast {
   position: fixed;
@@ -263,3 +263,15 @@
   white-space: nowrap;
 }
 .tc-hud-menu:hover, .tc-hud-menu:focus-visible { background: rgba(255, 255, 255, 0.2); outline: 2px solid #5fa8ff; outline-offset: 1px; }
+
+/* ---- cream chrome (final override, highest specificity wins) ---- */
+.tc-hud, .tc-hud .tc-hud-title, .tc-hud .tc-hud-key, .tc-hud .tc-hud-lang-btn, .tc-hud .tc-hud-toggle, .tc-hud .tc-hud-menu { color: #3b2f22; }
+.tc-hud { background: rgba(250, 240, 214, 0.86); }
+.tc-hud .tc-hud-title { font-weight: 800; letter-spacing: 0.08em; }
+.tc-hud .tc-hud-row { background: rgba(255, 255, 255, 0.78); border-color: rgba(120, 90, 60, 0.22); }
+.tc-hud .tc-hud-value { color: #b5441f; }
+.tc-hud .tc-hud-lang { border-color: rgba(120, 90, 60, 0.3); }
+.tc-hud .tc-hud-lang-btn.is-active { background: rgba(120, 90, 60, 0.22); }
+.tc-hud .tc-hud-toggle { background: rgba(255, 255, 255, 0.8); border-color: rgba(120, 90, 60, 0.3); }
+.tc-hud--collapsed { background: transparent; }
+.tc-app-subtitle { color: rgba(59, 47, 34, 0.75) !important; opacity: 1 !important; }

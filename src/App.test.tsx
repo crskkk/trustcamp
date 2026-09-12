@@ -11,19 +11,19 @@ beforeEach(() => {
 describe("App shell", () => {
   it("renders the localized title", () => {
     render(<App />);
-    expect(screen.getByText("TrustCamp")).toBeInTheDocument();
+    expect(screen.getByText("THE BAR")).toBeInTheDocument();
   });
 
   it("renders the localized subtitle (defaults to English)", () => {
     render(<App />);
-    expect(screen.getByText("A mini-planet camping world. Under construction.")).toBeInTheDocument();
+    expect(screen.getByText(/a mini-planet camp/i)).toBeInTheDocument();
   });
 
   it("subtitle updates when language is changed via HUD toggle", () => {
     render(<App />);
     
     // Initial English subtitle
-    expect(screen.getByText(/mini-planet camping world/i)).toBeInTheDocument();
+    expect(screen.getByText(/mini-planet camp/i)).toBeInTheDocument();
     
     // Click Spanish language button
     fireEvent.click(screen.getByTestId("hud-lang-es"));
