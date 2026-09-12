@@ -3,9 +3,11 @@
 **Read this file, `STANDARDS.md`, and `GAUNTLET.md` before writing any code.**
 Violating a numbered rule here is an automatic evaluator `blocker` gap.
 
-1. **Stack.** React/TypeScript (Lovable) shell + Supabase backend; Unity WebGL
-   embedded for the 3D world; realtime transport hidden behind
-   `src/modules/bridge/api.ts`. Do not introduce other frameworks.
+1. **Stack.** React/TypeScript shell; **Three.js** for the 3D world
+   (`src/modules/world3d`, since v2.0 — the Unity WebGL embed was retired);
+   a Node WebSocket + SQLite server (`server/`) for realtime and persistence,
+   Supabase Realtime kept as an alternate transport; realtime access hidden
+   behind `src/modules/bridge/api.ts`. Do not introduce other frameworks.
 
 2. **One public door per module.** Cross-folder imports go ONLY through the target
    folder's `api.ts` (TypeScript), `Api.cs` (Unity C#), or `api.py` (Python). The

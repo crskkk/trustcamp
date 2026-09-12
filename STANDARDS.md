@@ -29,20 +29,24 @@ closed unless every criterion here passes.
   3. A new module can be added by copying one existing folder and only editing its
      `module.yaml` + api file.
 
-## 2. 3D World Rendering (Unity WebGL)
+## 2. 3D World Rendering (Three.js, in-browser)
 
 - **Standard:** A spherical mini-planet that is readable at a glance: distinct
-  biomes (forest, lake, camp, mountains/valleys) visible from any vantage; stable
-  performance in the browser; art direction is low-poly "business kawaii".
-- **Best-in-class references:** **Outer Wilds (Mobius Digital)** for spherical-planet
-  traversal and landmark-first composition; **Krunker.io** for proof a low-spec art
-  style can hit high fps in a browser.
+  areas (campground with large structures, lake, forest with trails, hills)
+  visible from any vantage; stable performance in the browser; art direction is
+  low-poly Animal-Crossing-like: rounded silhouettes, 3-step toon shading, warm
+  sun, soft shadows, pastel-but-saturated palette, dense ground detail.
+- **Best-in-class references:** **Animal Crossing: New Horizons** for character
+  proportion (≈2.5 heads), scale (tree ≈ 3 characters, cabin ≈ 2.5), palette and
+  "nothing is empty" density; **Outer Wilds** for spherical traversal and
+  landmark-first composition.
 - **Falsifiable criteria:**
-  1. Playwright smoke test: WebGL canvas renders non-empty frames within 10 s of
-     page load (no black screen, no loader hang).
-  2. In-editor benchmark scene reports ≥ 30 fps at 1280×720 on an M-class machine
-     (recorded in `unity/TestResults/`).
-  3. Camera script can orbit/follow; all four biomes reachable on foot within 60 s.
+  1. Playwright smoke test: the canvas renders non-black frames within 10 s of
+     page load (`e2e/embed-smoke.spec.ts` via `World.probeFrame()`).
+  2. ≥ 30 fps at 1280×720 on an integrated GPU at the "high" tier; the "low" and
+     "software" tiers keep the page responsive on weak/software GL (`__tcWorld.fps`).
+  3. All four areas reachable on foot within 60 s (`planet.spec.ts` bounds the trail
+     loop < 360 m at 6 m/s); the chase camera never enters terrain.
 
 ## 3. Avatar System ("business kawaii")
 

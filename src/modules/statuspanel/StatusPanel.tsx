@@ -28,11 +28,11 @@ export function StatusPanel() {
   const [dismissed, setDismissed] = useState(false);
 
   async function refresh() {
+    // Readouts first (fast fetches), workers after: the in-browser workers
+    // share the main thread with the WebGL world and can take a while.
+    const [tests, version, systemMd, taskLog] = await Promise.all([readTestResults(), readVersion(), readSystemMd(), readTaskLog()]);
+    setState({ results: {} as PanelState["results"], tests, version, systemMd, taskLog });
     const results = await runAllWorkers();
-    const tests = await readTestResults();
-    const version = await readVersion();
-    const systemMd = await readSystemMd();
-    const taskLog = await readTaskLog();
     setState({ results, tests, version, systemMd, taskLog });
   }
 

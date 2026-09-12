@@ -29,11 +29,29 @@
 - **depends_on:** —
 - **description:** Localization module. Exposes t(key, lang) and detectLang(). Holds the en/es/pt dictionaries. Other modules must not hold user-facing string literals; they call this module's api. The i18n-check worker verifies coverage against these dictionaries.
 
+### leaderboard `0.1.0`
+
+- **api:** `src/modules/leaderboard/api.ts`
+- **depends_on:** bridge
+- **description:** Real-time leaderboard. Keeps one row per player (opaque id, generated camper nickname from the avatar seed, score, level, rounds) - the local player's row is fed by minigame round results; other players' rows arrive through the bridge state stream (score/level ride along with position). Rows go stale after 12 s without an update. Team score = sum of present players.
+
 ### lti `0.1.0`
 
 - **api:** `src/modules/lti/api.ts`
 - **depends_on:** —
 - **description:** LTI 1.3 Phase C scaffold: OIDC login handler, JWT validation, and session token emit with privacy-first design. Only the opaque 'sub' claim is used; no PII (name, email, etc.) is ever requested or stored.
+
+### menu `0.1.0`
+
+- **api:** `src/modules/menu/api.tsx`
+- **depends_on:** hud, i18n, world3d, avatar, minigames, leaderboard, progress, bridge, lti
+- **description:** The collapsible in-game menu: a side drawer with four tabs - Play (start / stop Camp Games rounds, jump, wave, walk to an area), Customize (your camper: re-roll, quick picks), Leaderboard (live rows + team score) and Settings (language, graphics tier, multiplayer server, connection status, host-only "wrap session and push grades"). Opens from the HUD menu button and from the Avatar / Leaderboard rows; closes with Escape or the X. All strings come from the i18n dictionaries.
+
+### minigames `0.1.0`
+
+- **api:** `src/modules/minigames/api.ts`
+- **depends_on:** world3d, scorebus, i18n
+- **description:** The Minigame Engine: a registry of self-contained event files (events/<slug>.ts) and a round runner (start / tick / end) with a world-facing context (pickups, player distance, campfire, awards, progress, toasts). Rounds are 15-90 s and emit a scorebus RoundEnvelope on end. Passive events (foraging) run alongside rounds and award XP directly. Adding a game = one new file under events/ plus one register() call.
 
 ### npc `0.3.0`
 
@@ -46,6 +64,12 @@
 - **api:** `src/modules/presence/api.ts`
 - **depends_on:** bridge, i18n
 - **description:** Realtime presence view: subscribes to the bridge, normalizes per-player state, prunes stale entries, and exposes a small hook + event bus. Powers the dev-only PresenceOverlay HUD strip and is the foundation for the multiplayer avatar rendering in task 0103. No PII; the only identifier is the bridge's opaque sessionId. Cross-tab sync uses a localStorage heartbeat absorbed via the storage event (works in any same-origin tab pair on one machine; the real Supabase channel in v3 will reach across machines and into incognito). Dev-only window.__tcPresenceTest seam is tree-shaken in production builds.
+
+### progress `0.1.0`
+
+- **api:** `src/modules/progress/api.ts`
+- **depends_on:** —
+- **description:** Player progression: XP total, level curve, level-up events. Pure curve functions (xpForLevel, levelFromXp) plus a small persisted store (localStorage in solo mode; the server store plugs in through setProgressPersistence). No PII - keyed only by the opaque player id the caller supplies.
 
 ### scorebus `0.1.0`
 
@@ -65,8 +89,8 @@
 - **depends_on:** i18n
 - **description:** TEMPORARY dev-only System Status overlay (task 0001). Renders live worker status lights, test pass %, SYSTEM.md preview, and the version chip. This module is the temporary visual artifact required by GAUNTLET.md §1 for a backend component; it is absorbed by the real HUD (task 0006) or Admin panel (task 0306) and this folder is removed at that time.
 
-### world `0.2.0`
+### world3d `0.1.0`
 
-- **api:** `src/modules/world/api.ts`
-- **depends_on:** bridge, i18n
-- **description:** The React iframe host for the embedded Unity WebGL world. Renders the iframe at /unity/Build/index.html, installs the bridge on mount, and shows a localized loading overlay until the build loads. Calls bridge.joinWorld() on load to prove the Unity↔shell pipe. The actual Unity build is task 0003.
+- **api:** `src/modules/world3d/api.ts`
+- **depends_on:** avatar, i18n
+- **description:** The 3D world, rendered in-browser with Three.js (replaces the Unity WebGL embed). A low-poly mini-planet with four areas - campground with large structures, lake with a dock, forest with trails, hills - plus the procedural Animal-Crossing-style character builder, sphere-walk locomotion, chase camera, toon lighting, sky/clouds/water. Exposes the React WorldCanvas plus a small imperative surface (getWorld, onFrame, setOrbit, npcWanderBy) so presence/npc/minigame modules can place bodies and props without touching Three.js internals. Pure planet math (heightAt, biomeAt, walker) is unit tested and shared with the server for authoritative checks.

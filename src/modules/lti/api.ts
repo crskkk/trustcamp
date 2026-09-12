@@ -95,6 +95,48 @@ export async function getGroups(sessionId: string): Promise<string[]> {
   return [];
 }
 
+export interface LaunchInfo {
+  /** Resume token minted by the server for this platform user. */
+  token: string;
+  /** Session id (one per course + resource link). */
+  session: string;
+  /** WebSocket URL of the game server that handled the launch. */
+  ws: string | null;
+  /** Instructor / admin launch: may wrap the session and push grades. */
+  host: boolean;
+}
+
+/**
+ * After a launch the server redirects to the client with the credentials in
+ * the URL hash (never the query string, so they stay out of logs/referrers).
+ */
+export function readLaunchFromHash(hash: string = typeof window !== "undefined" ? window.location.hash : ""): LaunchInfo | null {
+  const h = hash.replace(/^#/, "");
+  if (!h) return null;
+  const p = new URLSearchParams(h);
+  const token = p.get("token"), session = p.get("session");
+  if (p.get("lti") !== "1" || !token || !session) return null;
+  return { token, session, ws: p.get("ws"), host: p.get("host") === "1" };
+}
+
+/**
+ * Host action: ask the game server to push this session's scores to the
+ * platform gradebook (AGS). `serverUrl` is the ws(s) or http(s) server URL.
+ */
+export async function wrapSession(serverUrl: string, sessionId: string, fetchImpl: typeof fetch = fetch): Promise<{ pushed: number; skipped: number }> {
+  const base = serverUrl.trim().replace(/^ws/, "http").replace(/\/$/, "");
+  if (!base) throw new Error("no server");
+  let token: string | null = null;
+  try { token = window.localStorage.getItem("tc.token"); } catch { /* ignore */ }
+  const res = await fetchImpl(`${base}/lti/wrap`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId, token }) });
+  if (!res.ok) {
+    let msg = `${res.status}`;
+    try { msg = ((await res.json()) as { error?: string }).error ?? msg; } catch { /* ignore */ }
+    throw new Error(msg);
+  }
+  return (await res.json()) as { pushed: number; skipped: number };
+}
+
 /**
  * Generate an opaque session token.
  */

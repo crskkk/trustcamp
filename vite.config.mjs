@@ -37,6 +37,8 @@ function serveRootArtifacts() {
 }
 
 export default defineConfig({
+  // Pages serves the client under /trustcamp/; local dev and Artifact snapshots use "/".
+  base: process.env.VITE_BASE ?? "/",
   plugins: [react(), serveRootArtifacts()],
   server: {
     host: "127.0.0.1",
@@ -45,6 +47,15 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      // Stable names so the Artifact snapshot wrapper can reference them.
+      output: {
+        entryFileNames: "assets/[name].js",
+        chunkFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name].[ext]",
+      },
+    },
   },
   test: {
     globals: true,
@@ -52,6 +63,6 @@ export default defineConfig({
     setupFiles: ["./src/test-setup.ts"],
     reporters: ["default", "json"],
     outputFile: "test-results.json",
-    include: ["src/**/*.{test,spec}.{ts,tsx}", "workers/**/*.{test,spec}.ts"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}", "workers/**/*.{test,spec}.ts", "server/**/*.spec.ts"],
   },
 });

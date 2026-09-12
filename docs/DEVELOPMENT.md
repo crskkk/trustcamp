@@ -2,16 +2,21 @@
 
 ## Architecture (the only valid picture)
 
-Three deployables, one repo:
+Two deployables, one repo (since v2.0; the Unity WebGL build was retired):
 
-1. **React/Lovable shell** (`src/`) — HUD, admin panel, landing/screensaver, LTI
-   launch endpoint, and the iframe that hosts the Unity WebGL build.
-2. **Unity WebGL build** (`unity/`, built to `public/unity/Build/`) — the 3D world:
-   planet terrain, avatars, NPCs, minigames visuals, camera. The shell wraps it and
-   routes real-time traffic through `src/modules/bridge/api.ts`.
-3. **Supabase backend** — Postgres (scores, teams, sessions, opaque LTI keys),
-   Realtime channels (presence/positions/events). Realtime access surface is exactly
-   `src/modules/bridge/api.ts` so Colyseus can be swapped in later (AGENTS §13).
+1. **React/TypeScript client** (`src/`, static; GitHub Pages) — HUD + menu,
+   screensaver, and the **Three.js world** (`src/modules/world3d`): planet terrain,
+   props, structures, campers, NPCs, pickups, camera. Game modules (minigames,
+   progress, leaderboard) talk to the world only through `world3d/api.ts` and to
+   the network only through `src/modules/bridge/api.ts`.
+2. **Node server** (`server/`; Fly.io or any Node host) — WebSocket relay
+   (`rooms.ts`), SQLite persistence (`db.ts`: players, progress, rounds,
+   sessions), LTI 1.3 endpoints (`lti.ts`). Wire protocol in `server/protocol.ts`
+   (shared with the client transport). Supabase Realtime remains an alternate
+   transport behind the same bridge api (AGENTS §13).
+
+Solo mode needs no server: the bridge falls back to an in-memory bus and progress
+lives in localStorage.
 
 ### Module layout
 

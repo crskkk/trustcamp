@@ -1,7 +1,0 @@
-{
-    "name": "TrustCamp.World",
-    "references": ["UnityEngine"],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false
-}

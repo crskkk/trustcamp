@@ -38,20 +38,80 @@ body {
   pointer-events: none;
 }
 
-/* World embed (task 0002) — hosts the Unity WebGL iframe, full-window. */
+/* World (world3d) — the Three.js canvas, full-window, with touch controls. */
 .tc-world {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #05080f;
+  background: #cfe9ff;
+  touch-action: none;
 }
-.tc-world-iframe {
+.tc-world-canvas {
   width: 100%;
   height: 100%;
-  border: 0;
   display: block;
+  outline: none;
+}
+.tc-world-hint {
+  position: absolute;
+  left: 50%;
+  top: 84px;
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(20, 30, 40, 0.55);
+  color: #fff;
+  font-size: 0.85rem;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  backdrop-filter: blur(6px);
+}
+.tc-world-hint.is-hidden { opacity: 0; }
+.tc-joystick {
+  position: absolute;
+  left: 26px;
+  bottom: 30px;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  display: grid;
+  place-items: center;
+  touch-action: none;
+  user-select: none;
+  z-index: 6;
+}
+.tc-joystick-knob {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+.tc-jump {
+  position: absolute;
+  right: 28px;
+  bottom: 40px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 200, 90, 0.85);
+  color: #4a3b33;
+  font-size: 1.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: none;
+  z-index: 6;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tc-joystick, .tc-jump { opacity: 0.35; }
+  .tc-joystick:hover, .tc-jump:hover { opacity: 0.9; }
 }
 .tc-world-loading {
   position: absolute;

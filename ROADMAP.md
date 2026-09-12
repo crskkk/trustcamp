@@ -1,6 +1,6 @@
 # ROADMAP.md — Versioned Priorities & Integration Strategy
 
-**Current version: v1.4** (StatusPanel reads this line to render the version chip.)
+**Current version: v2.3** (StatusPanel reads this line to render the version chip.)
 
 Versions use **dot-versioning** `vX.Y`: X = milestone (phase of the world), Y = task
 merged within that phase. Every merged task bumps Y. Milestone gates (M1–M4 below)
@@ -8,6 +8,24 @@ must ALL pass before X increments. Current version moves forward one merge at a 
 see git history for the up-to-date value.
 
 ## Merged
+- `v2.3` — **THE BAR** menu + LTI: collapsible side drawer (Play / Customize / Leaderboard /
+  Settings) opened from the HUD; camper re-roll + quick picks; language, graphics tier,
+  multiplayer server settings; LTI 1.3 tool on the server (OIDC login, launch, JWKS, AGS
+  grade push on host "wrap"), `docs/MOODLE.md`. **M4 gate partially met:** grade push is
+  verified against a mock platform in `server/lti.spec.ts`; the live Moodle run (T-9) needs
+  the server on an https host.
+- `v2.2` — **THE BAR** multiplayer + persistence: `server/` WebSocket relay (rooms, 15 Hz
+  fan-out, rate limits) + SQLite (players/resume tokens, progress, rounds, sessions);
+  `bridge` ws transport behind the same api; server-backed XP; two-context Playwright test.
+  **M2 gate met on the real transport** (two browsers see each other move).
+- `v2.1` — **THE BAR** Camp Games: `minigames` engine + Firewood Dash / Lantern Relay /
+  passive foraging event files, `progress` (XP + levels), `leaderboard` (live rows, team
+  score), HUD round panel + toasts. **M3 gate met** (two fleshed-out minigames, solo or
+  with live teammates).
+- `v2.0` — **THE BAR** world in Three.js (replaces the Unity WebGL embed): `world3d` module —
+  sphere planet with campground (lodge, cabins, tents, campfire, dock), lake, forest trails,
+  terraced hills; instanced props; toon lighting; procedural Animal-Crossing-style camper;
+  sphere-walk + chase camera; quality tiers. Unity project retired to git history.
 - `v1.4` — 0104 NPC camo + locomotion (TS-only delivery: `npc/motion.ts` pure `chooseInput` policy, `npc/bridge.ts` per-tick `bridge.sendState` publisher, motion parity asserted at mock level and through the chip `data-x` ticking e2e). **No Unity bodies in this round** — the shell→Unity glue, the `StaticConfig` writer, and the cross-process broadcast transport all land in 0105. The build at `public/unity/Build/` predates `NpcController.cs` and `NpcSpawner.cs`.
 - `v1.3` — 0103 NPC spawner (new `npc` module: spawnNpc/clearNpcs/listNpcs/setNpcCap, avatar.generate() reuse per AGENTS §9, `presence.removePeer` + `PresenceMap.remove` for despawn, dev seed of 3 Prospects in the Bootstrap, i18n keys `npc.role.prospect` + `npc.dev.*`). Core NPC camo/locomotion land in 0104.
 - `v1.2` — 0102 Realtime presence wireup (new `presence` module: PresenceMap merge/prune/clear/interpolate, bridge consumer, dev-only PresenceOverlay HUD strip, BroadcastChannel test seam, Playwright two-tab e2e, i18n keys for `presence.title` + `presence.role.{scout,camp,hacker}`). **T-4 step 1 falsifiable end-to-end locally; real Supabase/LTI cross-network test deferred to v3.**
@@ -26,9 +44,10 @@ see git history for the up-to-date value.
 ## Integration strategy (how components come together)
 
 1. **Foundation (v0.x)** — the spine every later component plugs into: repo +
-   workers + i18n + docs pipeline, module rules, Unity harness embedded in the
-   React shell, spherical terrain scaffold, Supabase bridge api, HUD skeleton,
-   LTI scaffold with privacy defaults, avatar generator foundation.
+   workers + i18n + docs pipeline, module rules, the 3D world embedded in the
+   React shell (Unity WebGL until v1.4; Three.js from v2.0), spherical terrain
+   scaffold, Supabase bridge api, HUD skeleton, LTI scaffold with privacy
+   defaults, avatar generator foundation.
 2. **Core (v1.x)** — camera, avatar semantics, realtime presence, NPC spawner,
    roles & slots, scout funnel (become playable).
 3. **Play (v2.x)** — entry gate, minigame engine, Scouting task, Onboarding tent

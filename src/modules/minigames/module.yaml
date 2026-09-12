@@ -1,0 +1,14 @@
+name: minigames
+description: >-
+  The Minigame Engine: a registry of self-contained event files
+  (events/<slug>.ts) and a round runner (start / tick / end) with a
+  world-facing context (pickups, player distance, campfire, awards, progress,
+  toasts). Rounds are 15-90 s and emit a scorebus RoundEnvelope on end.
+  Passive events (foraging) run alongside rounds and award XP directly.
+  Adding a game = one new file under events/ plus one register() call.
+version: 0.1.0
+api: src/modules/minigames/api.ts
+depends_on:
+  - world3d
+  - scorebus
+  - i18n

@@ -4,16 +4,16 @@ import { test, expect } from "@playwright/test";
 // what was built (workers, tests, SYSTEM.md, version) in a live dev run.
 test("status panel shows workers, tests, SYSTEM.md preview, and version chip", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByText("System Status")).toBeVisible();
-  await expect(page.getByText("arch:check")).toBeVisible();
-  await expect(page.getByText("i18n:check")).toBeVisible();
-  await expect(page.getByText("system:update")).toBeVisible();
-  await expect(page.getByText("bundle:guard")).toBeVisible();
+  await expect(page.getByText("System Status").first()).toBeVisible();
+  await expect(page.getByText("arch:check").first()).toBeVisible();
+  await expect(page.getByText("i18n:check").first()).toBeVisible();
+  await expect(page.getByText("system:update").first()).toBeVisible();
+  await expect(page.getByText("bundle:guard").first()).toBeVisible();
   // Test pass line (format "N / M") and version chip both present.
   await expect(page.getByText(/\d+ \/ \d+/)).toBeVisible();
   await expect(page.getByTestId("version-chip")).toBeVisible();
   // SYSTEM.md preview visible somewhere.
-  await expect(page.getByText("## Modules")).toBeVisible();
+  await expect(page.getByText("## Modules").first()).toBeVisible();
   // Task log section appears once the panel fetches TASK_LOG.md.
   // The fetch is async and may take a moment after HMR + dev-server boot;
   // poll instead of asserting-on-first-shot.

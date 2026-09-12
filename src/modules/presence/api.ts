@@ -155,10 +155,7 @@ function writeHeartbeat(opts: StartPresenceOptions): void {
   }
 }
 
-function readPeerHeartbeat(key: string): PeerHeartbeat | null {
-  const s = safeStorage();
-  if (!s) return null;
-  const raw = s.getItem(key);
+function parseHeartbeat(raw: string | null | undefined): PeerHeartbeat | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as PeerHeartbeat;
@@ -167,6 +164,12 @@ function readPeerHeartbeat(key: string): PeerHeartbeat | null {
   } catch {
     return null;
   }
+}
+
+function readPeerHeartbeat(key: string): PeerHeartbeat | null {
+  const s = safeStorage();
+  if (!s) return null;
+  return parseHeartbeat(s.getItem(key));
 }
 
 function pruneStalePeers(_opts: StartPresenceOptions, _now: number): void {
@@ -189,7 +192,10 @@ export function startPresence(opts: StartPresenceOptions = {}): PresenceMap {
   // 1) Subscribe to the bridge — the real source of truth when Supabase is
   //    configured; in-memory fallback otherwise (single-tab; harmless).
   bridgeUnsub = onState((raw: WorldState) => {
-    if (selfId && raw.playerId === selfId) return;
+    // The self id can change after a networked join (server-assigned id), so
+    // read the live option rather than the value captured at first start.
+    const me = currentOpts?.selfId ?? selfId;
+    if (me && raw.playerId === me) return;
     const remote = inject(raw);
     if (!remote) return;
     const had = map.has(remote.playerId);
@@ -219,7 +225,10 @@ export function startPresence(opts: StartPresenceOptions = {}): PresenceMap {
         }
         return;
       }
-      const peer = readPeerHeartbeat(key);
+      // Prefer the value carried by the event: every tab rewrites the shared
+      // key several times a second, so re-reading storage can miss a peer's
+      // write that was overwritten before this handler ran.
+      const peer = parseHeartbeat(evt.newValue) ?? readPeerHeartbeat(key);
       if (peer) absorbPeerHeartbeat(peer);
     };
     window.addEventListener("storage", storageHandler);

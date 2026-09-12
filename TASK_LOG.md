@@ -46,3 +46,13 @@
 | scaffold | v1.2 | TASK_LOG.md + StatusPanel task-cost table | `a2ba7c1` | 240 | 100 | 6 | 11 000 | 3 800 | 15 146 |
 | 0103 | v1.3 | NPC spawner (avatar reuse, presence integration) | `1418ec9` | 380 | 1 | 15 | 18 000 | 6 000 | 30 378 |
 | 0104 | v1.4 | NPC camo + locomotion (TS motion policy + bridge tick) | `3eef3af` | 892 | 34 | 26 | 48 000 | 16 000 | 73 957 |
+| bar-0 | v2.0 | THE BAR world in Three.js (world3d, Unity retired) | `06fc093` | 4 200 | 60 | 40 | 420 000 | 60 000 | 484 260 |
+| bar-1 | v2.1 | Camp Games: minigames, progress, leaderboard, HUD panels | `2a67e90` | 2 300 | 40 | 30 | 260 000 | 42 000 | 304 340 |
+| bar-fx | v2.1 | e2e stabilization (quality tiers, presence race, probes) | `d42b7e1` | 500 | 120 | 60 | 380 000 | 48 000 | 428 620 |
+| bar-2 | v2.2 | multiplayer server + persistence (ws transport, SQLite) | `af18d9f` | 1 900 | 200 | 70 | 520 000 | 70 000 | 592 100 |
+| bar-3 | v2.3 | menu drawer + LTI 1.3 launch/wrap + Moodle guide | `f75de89` | 1 700 | 40 | 30 | 240 000 | 40 000 | 281 740 |
+
+> **THE BAR rows** (bar-*): one session, one agent, built inline under a $100 USD cap
+> (Claude Fable 5.1, cached-context pricing). `conv_in` counts cached prefix reads; the
+> dollar-equivalent of all bar-* rows is roughly $55 — see the PR description for the
+> phase-by-phase breakdown.

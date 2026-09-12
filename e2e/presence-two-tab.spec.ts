@@ -64,7 +64,7 @@ test("two tabs see each other via the bridge pipe and heartbeat", async () => {
   await expect.poll(async () => {
     return (await pageA.getByTestId("presence-overlay").count()) === 1
       && (await pageB.getByTestId("presence-overlay").count()) === 1;
-  }, { timeout: 5_000 }).toBe(true);
+  }, { timeout: 20_000 }).toBe(true); // two full 3D worlds boot in one headless browser
 
   // Tab A "publishes" a peer heartbeat that tab B will see in its overlay.
   await writeHeartbeat(pageA, [pageB], { selfId: "remote-p1", role: "scout", x: 1, y: 2, z: 3 });

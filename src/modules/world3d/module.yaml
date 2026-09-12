@@ -1,0 +1,16 @@
+name: world3d
+description: >-
+  The 3D world, rendered in-browser with Three.js (replaces the Unity WebGL
+  embed). A low-poly mini-planet with four areas - campground with large
+  structures, lake with a dock, forest with trails, hills - plus the
+  procedural Animal-Crossing-style character builder, sphere-walk locomotion,
+  chase camera, toon lighting, sky/clouds/water. Exposes the React
+  WorldCanvas plus a small imperative surface (getWorld, onFrame, setOrbit,
+  npcWanderBy) so presence/npc/minigame modules can place bodies and props
+  without touching Three.js internals. Pure planet math (heightAt, biomeAt,
+  walker) is unit tested and shared with the server for authoritative checks.
+version: 0.1.0
+api: src/modules/world3d/api.ts
+depends_on:
+  - avatar
+  - i18n
