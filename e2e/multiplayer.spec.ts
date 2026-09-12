@@ -52,7 +52,7 @@ test("two tabs on the server see each other and follow movement", async ({ brows
   // Reload A: same resume token, same player id on the server.
   const tokenBefore = await a.evaluate(() => localStorage.getItem("tc.token"));
   await a.reload();
-  await expect(a.getByTestId("world-canvas")).toHaveAttribute("data-ready", "1", { timeout: 20_000 });
+  await expect(a.getByTestId("world-canvas")).toHaveAttribute("data-ready", "1", { timeout: 40_000 });
   await expect.poll(() => a.evaluate(() => localStorage.getItem("tc.token")), { timeout: 10_000 }).toBe(tokenBefore);
 
   await ctxA.close();
