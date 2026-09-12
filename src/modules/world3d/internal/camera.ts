@@ -16,7 +16,7 @@ export class ChaseCamera {
   private initialised = false;
 
   constructor(aspect: number) {
-    this.camera = new PerspectiveCamera(52, aspect, 0.1, 700);
+    this.camera = new PerspectiveCamera(50, aspect, 0.1, 700);
   }
 
   /** Snap to the desired position on the next update (after a teleport). */
@@ -41,7 +41,7 @@ export class ChaseCamera {
       this.initialised = false;
       return;
     }
-    _desired.copy(feet).addScaledVector(up, 2.7).addScaledVector(fwd, -5.4);
+    _desired.copy(feet).addScaledVector(up, 3.4).addScaledVector(fwd, -6.0); // 3/4 diorama angle
     if (!this.initialised) {
       this.pos.copy(_desired);
       this.initialised = true;
@@ -54,7 +54,7 @@ export class ChaseCamera {
     if (this.pos.length() < minR) this.pos.setLength(minR);
     this.camera.position.copy(this.pos);
     this.camera.up.copy(up);
-    _look.copy(feet).addScaledVector(up, 1.0);
+    _look.copy(feet).addScaledVector(up, 0.8);
     this.camera.lookAt(_look);
   }
 }

@@ -54,7 +54,7 @@ function placeCamp(obj: Object3D, e: number, n: number, yaw?: number, extraUp = 
 function lodge(): Group {
   const g = new Group();
   g.add(box(7, 3.2, 5, PALETTE.wood, 0, 1.6, 0));
-  g.add(gable(8, 2.3, 6.2, PALETTE.roof, 0, 3.2, 0));
+  g.add(gable(8, 3.0, 6.2, PALETTE.roof, 0, 3.2, 0));
   g.add(box(1.1, 2.0, 0.12, PALETTE.woodDark, 0, 1.0, 2.52));
   for (const x of [-2.3, 2.3]) g.add(box(1.0, 0.85, 0.1, 0x8fd2ff, x, 1.8, 2.52));
   for (const x of [-2.3, 2.3]) g.add(box(1.0, 0.85, 0.1, 0x8fd2ff, x, 1.8, -2.52));
@@ -70,7 +70,7 @@ function lodge(): Group {
 function cabin(roof: number): Group {
   const g = new Group();
   g.add(box(3.2, 2.2, 3.0, PALETTE.wood, 0, 1.1, 0));
-  g.add(gable(3.8, 1.4, 3.6, roof, 0, 2.2, 0));
+  g.add(gable(3.8, 1.9, 3.6, roof, 0, 2.2, 0));
   g.add(box(0.8, 1.5, 0.1, PALETTE.woodDark, 0, 0.75, 1.52));
   g.add(box(0.7, 0.6, 0.08, 0x8fd2ff, 1.0, 1.4, 1.52));
   return g;

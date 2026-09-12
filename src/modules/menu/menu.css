@@ -10,8 +10,8 @@
   display: flex;
   flex-direction: column;
   border-radius: 16px;
-  background: rgba(24, 28, 38, 0.9);
-  color: #f4f4f6;
+  background: rgba(46, 36, 28, 0.93);
+  color: #fff7e6;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);

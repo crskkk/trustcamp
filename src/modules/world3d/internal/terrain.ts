@@ -55,8 +55,8 @@ export function buildTerrain(detail = 80): Mesh {
     const parity = ((f / 3) | 0) & 1;
 
     col.copy(cGrass);
-    col.lerp(v > 0 ? cGL : cGD, Math.min(1, Math.abs(v)) * 0.55);
-    col.lerp(parity ? cGL : cGD, 0.14);
+    col.lerp(v > 0 ? cGL : cGD, Math.min(1, Math.abs(v)) * 0.25);
+    col.lerp(parity ? cGL : cGD, 0.04); // a whisper of the AC triangle-grass, not a checkerboard
     if (fm > 0) col.lerp(cGD, fm * 0.25);
     if (hm > 0) col.lerp(cMeadow, hm * 0.35);
     if (hm > 0 && h > 3.6) col.lerp(v > 0 ? cRock : cRockD, smoothstep(3.6, 4.6, h));

@@ -134,17 +134,17 @@ const KINDS: Kind[] = [
     weight: (m, h) => (m.tm > 0.3 || m.lm > 0.4 || m.cm > 0.6 || h() > 4 ? 0 : m.fm * 0.5 + 0.1 + (m.tm > 0.02 ? 0.55 : 0)),
   },
   {
-    name: "flower", seed: 14, count: 1200, scale: [0.8, 1.3],
+    name: "flower", seed: 14, count: 1900, scale: [0.8, 1.3],
     parts: [
       { geo: new CylinderGeometry(0.02, 0.025, 0.24, 4), color: 0x4f9a3a, offset: [0, 0.12, 0], shadow: false },
       { geo: new IcosahedronGeometry(0.1, 0), color: PALETTE.flower, offset: [0, 0.27, 0], shadow: false },
     ],
-    weight: (m, h) => (m.tm > 0.5 || m.lm > 0.5 || m.cm > 0.7 || h() > 3.8 ? 0 : 0.28 + (m.tm > 0.02 ? 0.6 : 0) + m.cm * 0.4),
+    weight: (m, h) => (m.tm > 0.5 || m.lm > 0.5 || m.cm > 0.85 || h() > 3.8 ? 0 : 0.28 + (m.tm > 0.02 ? 0.6 : 0) + m.cm * 0.4),
   },
   {
-    name: "grass", seed: 15, count: 2600, scale: [0.7, 1.3],
+    name: "grass", seed: 15, count: 4200, scale: [0.7, 1.3],
     parts: [{ geo: new ConeGeometry(0.085, 0.32, 4), color: [PALETTE.grassLight, PALETTE.grassDark, PALETTE.grass], offset: [0, 0.16, 0], shadow: false }],
-    weight: (m, h) => (m.tm > 0.4 || m.cm > 0.7 || h() < WATER_LEVEL + 0.25 || h() > 4.2 ? 0 : 0.9),
+    weight: (m, h) => (m.tm > 0.4 || m.cm > 0.92 || h() < WATER_LEVEL + 0.25 || h() > 4.2 ? 0 : 0.9),
   },
   {
     name: "rock", seed: 16, count: 220, scale: [0.6, 1.4],
@@ -167,8 +167,8 @@ const KINDS: Kind[] = [
   {
     name: "reed", seed: 19, count: 170, scale: [0.8, 1.3],
     parts: [
-      { geo: new CylinderGeometry(0.02, 0.025, 0.75, 4), color: 0x6e8f3d, offset: [0, 0.37, 0], shadow: false },
-      { geo: new CylinderGeometry(0.05, 0.05, 0.2, 5), color: 0x6b4a2a, offset: [0, 0.74, 0], shadow: false },
+      { geo: new CylinderGeometry(0.035, 0.045, 0.75, 5), color: 0x6e8f3d, offset: [0, 0.37, 0], shadow: false },
+      { geo: new CylinderGeometry(0.09, 0.09, 0.22, 6), color: 0x6b4a2a, offset: [0, 0.76, 0], shadow: false },
     ],
     weight: (m, h) => (m.lm <= 0 ? 0 : h() > WATER_LEVEL - 0.3 && h() < WATER_LEVEL + 0.35 ? 0.9 : 0),
   },

@@ -11,7 +11,7 @@ let gradient: DataTexture | null = null;
 /** A 3-step luminance ramp shared by every toon material. */
 export function gradientMap(): DataTexture {
   if (!gradient) {
-    const data = new Uint8Array([104, 182, 255]);
+    const data = new Uint8Array([140, 196, 255]); // lighter shadow step: soft, not black
     gradient = new DataTexture(data, 3, 1, RedFormat);
     gradient.minFilter = NearestFilter;
     gradient.magFilter = NearestFilter;
@@ -31,8 +31,8 @@ export interface Lights {
 }
 
 export function createLights(shadowSize: number): Lights {
-  const hemi = new HemisphereLight(0xd6ecff, 0x9c7f5f, 0.95);
-  const sun = new DirectionalLight(0xfff1d6, 2.7);
+  const hemi = new HemisphereLight(0xd6ecff, 0xa88a68, 1.3);
+  const sun = new DirectionalLight(0xfff1d6, 2.4);
   sun.castShadow = true;
   sun.shadow.mapSize.set(shadowSize, shadowSize);
   const c = sun.shadow.camera;

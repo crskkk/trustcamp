@@ -91,9 +91,9 @@ export function buildCharacter(spec: AvatarSpec): CharacterRig {
   const mkLeg = (x: number) => {
     const leg = new Group();
     leg.position.set(x, 0.2, 0);
-    leg.add(part(new CapsuleGeometry(0.065, 0.1, 3, 8), pants, 0, -0.07, 0));
-    const foot = part(new SphereGeometry(0.09, 10, 8), SHOE, 0, -0.16, 0.03);
-    foot.scale.set(1, 0.55, 1.35);
+    leg.add(part(new CapsuleGeometry(0.095, 0.08, 3, 8), pants, 0, -0.07, 0));
+    const foot = part(new SphereGeometry(0.105, 10, 8), SHOE, 0, -0.16, 0.035);
+    foot.scale.set(1, 0.6, 1.3);
     leg.add(foot);
     return leg;
   };
@@ -103,8 +103,8 @@ export function buildCharacter(spec: AvatarSpec): CharacterRig {
   const mkArm = (x: number) => {
     const arm = new Group();
     arm.position.set(x, 0.52, 0);
-    arm.add(part(new CapsuleGeometry(0.055, 0.14, 3, 8), shirt, 0, -0.1, 0));
-    arm.add(part(new SphereGeometry(0.06, 10, 8), skin, 0, -0.22, 0));
+    arm.add(part(new CapsuleGeometry(0.085, 0.1, 3, 8), shirt, 0, -0.1, 0));
+    arm.add(part(new SphereGeometry(0.08, 10, 8), skin, 0, -0.22, 0)); // mitten hand
     arm.rotation.z = x < 0 ? 0.18 : -0.18;
     return arm;
   };
@@ -119,8 +119,8 @@ export function buildCharacter(spec: AvatarSpec): CharacterRig {
 
   const eyeScale = spec.expression === 3 ? 1.3 : 1;
   for (const x of [-0.095, 0.095]) {
-    const e = part(new SphereGeometry(0.05, 10, 8), eye, x, 0.0, 0.21);
-    e.scale.set(0.9 * eyeScale, 1.35 * eyeScale, 0.5);
+    const e = part(new SphereGeometry(0.06, 10, 8), eye, x, 0.0, 0.21);
+    e.scale.set(1.05 * eyeScale, 1.1 * eyeScale, 0.55); // round AC eyes
     if (spec.expression === 2) e.rotation.z = x < 0 ? -0.3 : 0.3;
     const pupil = part(new SphereGeometry(0.03, 8, 6), 0x1e1a24, 0, -0.005, 0.03);
     pupil.scale.set(0.9, 1.2, 0.6);

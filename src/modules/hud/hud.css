@@ -9,7 +9,7 @@
   left: 0;
   right: 0;
   z-index: 20;
-  background: rgba(8, 10, 18, 0.55);
+  background: rgba(58, 44, 32, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: #f4f4f6;
@@ -140,7 +140,7 @@
   margin-left: 6px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: #ffe08a;
+  color: #b5441f;
 }
 .tc-hud-row--level { gap: 0; }
 .tc-hud-xp {
@@ -192,9 +192,9 @@
   min-width: 190px;
   padding: 10px 12px 12px;
   border-radius: 14px;
-  background: rgba(8, 10, 18, 0.62);
+  background: rgba(58, 44, 32, 0.78);
   backdrop-filter: blur(8px);
-  color: #f4f4f6;
+  color: #fff7e6;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
@@ -252,10 +252,10 @@
 .tc-hud-row--link:hover, .tc-hud-row--link:focus-visible { background: rgba(255, 255, 255, 0.16); outline: none; }
 .tc-hud-menu {
   pointer-events: auto;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  color: inherit;
+  border: 1px solid rgba(120, 90, 60, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 244, 214, 0.9);
+  color: #3b2f22;
   font-weight: 600;
   font-size: 13px;
   padding: 5px 10px;
